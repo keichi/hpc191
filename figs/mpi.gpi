@@ -1,0 +1,76 @@
+set term pdfcairo enhanced size 3.0in, 2.0in font "Helvetical,9"
+
+set grid
+
+set style fill solid border
+
+set style line  1 lt 1 ps 0.7 pt  2 lw 2 lc rgb '#4E79A7'
+set style line  2 lt 1 ps 0.7 pt  4 lw 2 lc rgb '#F28E2B'
+set style line  3 lt 1 ps 0.7 pt  8 lw 2 lc rgb '#E15759'
+set style line  4 lt 1 ps 0.7 pt  4 lw 2 lc rgb '#76B7B2'
+set style line  5 lt 1 ps 0.7 pt  6 lw 2 lc rgb '#59A14E'
+set style line  6 lt 1 ps 0.7 pt  8 lw 2 lc rgb '#EDC949'
+set style line  7 lt 1 ps 0.7 pt 10 lw 2 lc rgb '#B07AA2'
+set style line  8 lt 1 ps 0.7 pt 12 lw 2 lc rgb '#FF9DA7'
+set style line  9 lt 1 ps 0.7 pt 14 lw 2 lc rgb '#9C755F'
+set style line 10 lt 1 ps 0.7 pt 16 lw 2 lc rgb '#BAB0AC'
+
+set logscale xy
+set xrange [*:2**22]
+#set yrange [*:10**4]
+set xlabel "Message size [B]"
+set ylabel "Latency [{/Symbol m}s]" offset 1
+#set format xy "%2.0l{/Symbol \264}10^{%L}"
+set key top left samplen 2 box
+
+set output "mpi_latency.pdf"
+plot "mpi_p2p_lat_rack.dat" using 1:2 w lp ls 1 title "Same rack", \
+     "mpi_p2p_lat_node.dat" using 1:2 w lp ls 2 title "Same node", \
+   "mpi_p2p_lat_pciesw.dat" using 1:2 w lp ls 3 title "Same PCIe switch"
+
+unset output
+
+system "pdfcrop mpi_latency.pdf mpi_latency.pdf"
+
+set output "mpi_latency_vhve.pdf"
+plot "mpi_p2p_lat_rack.dat" using 1:2 w lp ls 1 title "VE-VE", \
+  "mpi_p2p_lat_rack_vh.dat" using 1:2 w lp ls 2 title "VH-VH"
+
+unset output
+
+system "pdfcrop mpi_latency_vhve.pdf mpi_latency_vhve.pdf"
+
+system "pdfcrop mpi_latency.pdf mpi_latency.pdf"
+
+set logscale x
+#set xrange [2**10:2**20]
+#set yrange [*:10**4]
+set xlabel "Message size [B]"
+set ylabel "Bandwidth [MB/s]" offset 3
+#set format xy "%2.0l{/Symbol \264}10^{%L}"
+set key top left samplen 2 box
+
+set output "mpi_bandwidth.pdf"
+plot "mpi_p2p_bw_rack.dat" using 1:2 w lp ls 1 title "Same rack", \
+     "mpi_p2p_bw_node.dat" using 1:2 w lp ls 2 title "Same node", \
+   "mpi_p2p_bw_pciesw.dat" using 1:2 w lp ls 3 title "Same PCIe switch"
+
+unset output
+
+system "pdfcrop mpi_bandwidth.pdf mpi_bandwidth.pdf"
+
+set logscale x
+#set xrange [2**10:2**20]
+#set yrange [*:10**4]
+set xlabel "Message size [B]"
+set ylabel "Bandwidth [MB/s]" offset 3
+#set format xy "%2.0l{/Symbol \264}10^{%L}"
+set key top left samplen 2 box
+
+set output "mpi_bandwidth_vhve.pdf"
+plot "mpi_p2p_bw_rack.dat" using 1:2 w lp ls 1 title "VE-VE", \
+  "mpi_p2p_bw_rack_vh.dat" using 1:2 w lp ls 2 title "VH-VH", \
+
+unset output
+
+system "pdfcrop mpi_bandwidth_vhve.pdf mpi_bandwidth_vhve.pdf"
