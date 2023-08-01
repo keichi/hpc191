@@ -46,13 +46,13 @@
 \end{abstract}
 
 \begin{eabstract}
-Cyberscience Center, Tohoku Unviversity has started the operation of a new vector supercomputer 
-``AOBA-S'' in August 2023. AOBA-S comprises of 504 compute nodes each equipped with eight
-third-generation Vector Engine (VE30) cards. Its peak compute performance reachaes 21.05\,PFLOP/s
-and its peak memory bandwidth is 9.97\,TB/s -- making it the world's largest vector super computer as
-of writing this paper. In this paper, we describe the basic design of AOBA-S and report the
-results of the initial performance evaluation that we have conducted prior to the operation start of
-AOBA-S.
+Cyberscience Center, Tohoku University has started the operation of a new vector supercomputer 
+``AOBA-S'' in August 2023. AOBA-S comprises 504 compute nodes each equipped with eight
+third-generation Vector Engine (VE30) cards. The peak compute performance and memory bandwidth of
+AOBA-S reach 21.05\,PFLOP/s and 9.97\,PB/s, respectively, making it the world's largest vector
+supercomputer as of writing this paper. In this paper, we describe the basic design of AOBA-S and
+report the results of the initial performance evaluation that we have conducted prior to the
+operation start of AOBA-S.
 \end{eabstract}
 
 %
@@ -68,17 +68,47 @@ AOBA-S.
 
 \section{はじめに}
 
-図\ref{fig:node}にAOBA-Sを構成するSX-Aurora C401-8ノードのアーキテクチャを示す．
-各ノードの中核にはAMD EPYC 7763プロセッサがあり，合計256GBのメモリを搭載している．
-各ノードには8基のVector Engine Type 30Aプロセッサが搭載されている．
-2基ずつ1つのPCIeスイッチに接続されており，各PCIeスイッチがルートコンプレックスに接続している．
+\section{AOBA-Sのアーキテクチャ}
 
-図\ref{fig:ve30}にVE30プロセッサの概要図を示す．
+\subsection{SX-Aurora TSUBASA C401-8}
+
+図\ref{fig:node}にAOBA-Sを構成するSX-Aurora TSUBASA (SX-AT) C401-8ノードの概念図を示す．
+SX-Aurora TSUBASAはVector Host (VH) とVector Engine (VE) の2種のプロセッサが搭載した
+ヘテロジニアスな計算機である．VEはPCI Expressカード上に実装されたベクトルプロセッサであり，HBMと
+密結合されたことにより．VHはVEから発行されたI/O等のOS処理を担うためのx86\_64プロセッサである．
+SX-AT C401-8はVHとして64コアのAMD EPYC 7763 CPUを採用しており，各ノードに8基のVector Engine Type
+30Aカードを搭載している．8基のVEは2基ずつ共有するPCIeスイッチを経由し，VHに接続している．
+VEは1基あたり96\,GBのHBM2Eメモリ，VHは256GBのDDR4メモリを搭載している．また，VHには2基のInfiniBand
+NDR 200G HCAが搭載されており，VHおよびVE間の通信手段として利用することが可能である．
+
+\begin{figure}
+  \centering
+  \includegraphics{figs/node_arch.pdf}
+  \caption{SX-Aurora TSUBASA C401-8の構成}\label{fig:node}
+\end{figure}
+
+図\ref{fig:ve30}にVector Engine Type 30A (VE30)プロセッサの概要を示す．VE30はVector
+Engineプロセッサの第3世代となるプロセッサである．VE30は16個のベクトルコアを搭載し，これらの
+ベクトル・コアが2次元メッシュ型Network on Chip
+(NoC)によって接続されている．ベクトルコア群はNoCによって6.4\,TB/sの帯域幅を有するLast Level Cache 
+(LLC) に接続しており，さらにLLCは2.45\,TB/sの帯域幅を有する96\,GBのHBM2Eメモリに接続している．
+各ベクトルコアはScalar Processing Unit (SPU) とVector Processing Unit (VPU) という2種の実行ユニット
+を搭載している．SPUは命令をフェッチ，デコードし，VPUへベクトル命令を発行する．VPUはベクトル命令を
+実行する．SPUにはL1キャッシュとL2キャッシュが搭載されており，さらに，VE30ではSPUとVPUが共有する
+2\,MBのL3キャッシュが追加されている．
+
+\begin{figure}
+  \centering
+  \includegraphics{figs/ve30_memory_hierarchy.pdf}
+  \caption{VE30の概要図~\cite{Takahashi2023}}\label{fig:ve30}
+\end{figure}
 
 前世代のVE Type 20Aと比較すると，ベクトルコアあたりの計算性能とメモリアクセス性能を同一である一方，
 コア数が10コアから16コアへ1.6倍に増加している．また，コア数の増加に応じてメモリ帯域幅も1.53\,TB/sから
 2.54\,TB/sへ1.6倍に向上している．さらに，メモリ容量は48\,GBから96\,GBへ2倍に拡大され，LLCの容量は
 16\,MBから64\,MBへ4倍に拡大している．
+
+\subsection{AOBA-S}
 
 相互結合網にはInfiniBand
 NDRを採用しており，フルバイセクションバンド幅およびノンブロッキングの2段Fat-treeトポロジによって
@@ -90,19 +120,6 @@ NDRを採用しており，フルバイセクションバンド幅およびノ�
 1基のES400NVX2がLustre MDS/MDTとして動作し，もう1基のES400NVX2がOSS/OSTとして動作する．
 OSS/OST用ES400NVX2には4基のSS9012エンクロージャが接続され，合計332本の7200rpm ニアラインSAS
 HDDを搭載している．各ES400NVX2は8本のInfiniBand HDRリンクによって相互結合網に接続している．
-
-\begin{figure}
-  \centering
-  \includegraphics{figs/node_arch.pdf}
-  \caption{SX-Aurora TSUBASA C401-8の構成}\label{fig:node}
-\end{figure}
-
-\begin{figure}
-  \centering
-  \includegraphics{figs/ve30_memory_hierarchy.pdf}
-  \caption{VE30の概要図~\cite{Takahashi2023}}\label{fig:ve30}
-\end{figure}
-
 
 \section{MPI通信性能}
 
