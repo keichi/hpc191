@@ -1,0 +1,36 @@
+set term pdfcairo enhanced size 3.0in, 2.0in font "Helvetical,9"
+
+set grid
+
+set style fill solid border
+
+set style line  1 lt 1 ps 0.7 pt  2 lw 2 lc rgb '#4E79A7'
+set style line  2 lt 1 ps 0.7 pt  4 lw 2 lc rgb '#F28E2B'
+set style line  3 lt 1 ps 0.7 pt  8 lw 2 lc rgb '#E15759'
+set style line  4 lt 1 ps 0.7 pt  4 lw 2 lc rgb '#76B7B2'
+set style line  5 lt 1 ps 0.7 pt  6 lw 2 lc rgb '#59A14E'
+set style line  6 lt 1 ps 0.7 pt  8 lw 2 lc rgb '#EDC949'
+set style line  7 lt 1 ps 0.7 pt 10 lw 2 lc rgb '#B07AA2'
+set style line  8 lt 1 ps 0.7 pt 12 lw 2 lc rgb '#FF9DA7'
+set style line  9 lt 1 ps 0.7 pt 14 lw 2 lc rgb '#9C755F'
+set style line 10 lt 1 ps 0.7 pt 16 lw 2 lc rgb '#BAB0AC'
+
+set logscale xy
+set ytics nomirror
+set y2tics
+set xrange [16:504]
+set y2range [0:100]
+set xlabel "# of VHs"
+set y2label "Efficiency [\%]"
+set ylabel "Performance [TFLOP/s]" offset 1
+set key top left samplen 2 box maxrows 2
+
+set output "hpl_hpcg.pdf"
+plot "hpl.dat" using 1:2 w lp ls 1 title "HPL Performance", \
+    "hpcg.dat" using 1:2 w lp ls 2 title "HPCG Performance", \
+     "hpl.dat" using 1:($2/($1*39.28)*100) axes x1y2 w lp ls 3 title "HPL Efficiency", \
+    "hpcg.dat" using 1:($2/($1*39.28)*100) axes x1y2 w lp ls 4 title "HPCG Efficiency"
+
+unset output
+
+system "pdfcrop hpl_hpcg.pdf hpl_hpcg.pdf"

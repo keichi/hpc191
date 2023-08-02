@@ -24,21 +24,12 @@ set ylabel "Latency [{/Symbol m}s]" offset 1
 set key top left samplen 2 box
 
 set output "mpi_latency.pdf"
-plot "mpi_p2p_lat_rack.dat" using 1:2 w lp ls 1 title "Same rack", \
-     "mpi_p2p_lat_node.dat" using 1:2 w lp ls 2 title "Same node", \
-   "mpi_p2p_lat_pciesw.dat" using 1:2 w lp ls 3 title "Same PCIe switch"
+plot "mpi_p2p_lat_rack.dat" using 1:2 w lp ls 1 title "VE-VE (same rack)", \
+     "mpi_p2p_lat_node.dat" using 1:2 w lp ls 2 title "VE-VE (same node)", \
+   "mpi_p2p_lat_pciesw.dat" using 1:2 w lp ls 3 title "VE-VE (same PCIe switch)", \
+  "mpi_p2p_lat_rack_vh.dat" using 1:2 w lp ls 4 title "VH-VH (same rack)"
 
 unset output
-
-system "pdfcrop mpi_latency.pdf mpi_latency.pdf"
-
-set output "mpi_latency_vhve.pdf"
-plot "mpi_p2p_lat_rack.dat" using 1:2 w lp ls 1 title "VE-VE", \
-  "mpi_p2p_lat_rack_vh.dat" using 1:2 w lp ls 2 title "VH-VH"
-
-unset output
-
-system "pdfcrop mpi_latency_vhve.pdf mpi_latency_vhve.pdf"
 
 system "pdfcrop mpi_latency.pdf mpi_latency.pdf"
 
@@ -51,26 +42,11 @@ set ylabel "Bandwidth [MB/s]" offset 3
 set key top left samplen 2 box
 
 set output "mpi_bandwidth.pdf"
-plot "mpi_p2p_bw_rack.dat" using 1:2 w lp ls 1 title "Same rack", \
-     "mpi_p2p_bw_node.dat" using 1:2 w lp ls 2 title "Same node", \
-   "mpi_p2p_bw_pciesw.dat" using 1:2 w lp ls 3 title "Same PCIe switch"
+plot "mpi_p2p_bw_rack.dat" using 1:2 w lp ls 1 title "VE-VE (same rack)", \
+     "mpi_p2p_bw_node.dat" using 1:2 w lp ls 2 title "VE-VE (same node)", \
+   "mpi_p2p_bw_pciesw.dat" using 1:2 w lp ls 3 title "VE-VE (same PCIe switch)", \
+  "mpi_p2p_bw_rack_vh.dat" using 1:2 w lp ls 4 title "VH-VH (same rack)"
 
 unset output
 
 system "pdfcrop mpi_bandwidth.pdf mpi_bandwidth.pdf"
-
-set logscale x
-#set xrange [2**10:2**20]
-#set yrange [*:10**4]
-set xlabel "Message size [B]"
-set ylabel "Bandwidth [MB/s]" offset 3
-#set format xy "%2.0l{/Symbol \264}10^{%L}"
-set key top left samplen 2 box
-
-set output "mpi_bandwidth_vhve.pdf"
-plot "mpi_p2p_bw_rack.dat" using 1:2 w lp ls 1 title "VE-VE", \
-  "mpi_p2p_bw_rack_vh.dat" using 1:2 w lp ls 2 title "VH-VH", \
-
-unset output
-
-system "pdfcrop mpi_bandwidth_vhve.pdf mpi_bandwidth_vhve.pdf"

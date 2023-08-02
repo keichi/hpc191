@@ -10,12 +10,11 @@
 \usepackage[utf8]{inputenc}
 \usepackage{listings}
 \usepackage[all, warning]{onlyamsmath}
+\usepackage{siunitx}
 \usepackage[subrefformat=parens]{subcaption}
 \usepackage{url}
 
-\def\Underline{\setbox0\hbox\bgroup\let\\\endUnderline}
-\def\endUnderline{\vphantom{y}\egroup\smash{\underline{\box0}}\\}
-\def\|{\verb|}
+\newcommand{\us}{\si{\micro\second}}
 
 \begin{document}
 
@@ -110,16 +109,72 @@ Engineプロセッサの第3世代となるプロセッサである．VE30は16�
 
 \subsection{AOBA-S}
 
+\begin{table}
+\centering
+\caption{AOBA-Sの性能諸元}\label{tbl:aoba-s}
+\begin{tabular}{@{}lll@{}}
+\toprule
+ノード数        & ノード単体     & システム全体           \\ \midrule
+VE数            & 8              & 4,032                  \\ \midrule
+VH数            & 1              & 504                    \\
+VE理論演算性能  & 39.28\,TFLOP/s & 19.79\,PFLOP/s         \\
+VEメモリ帯域幅  & 19.60\,TB/s    & 9.87\,PB/s             \\
+VEメモリ容量    & 768\,GB        & 378\,TB                \\ \midrule
+VH理論演算性能  & 2.50\,TFLOP/s  & 1.26\,PFLOPS/s         \\
+VHメモリ帯域幅  & 0.20\,TB/s     & 0.1\,PB/s              \\
+VHメモリ容量    & 256\,GB        & 126\,TB                \\ \midrule
+相互結合網      & \multicolumn{2}{c}{InfiniBand NDR}      \\
+共有ストレージ  & \multicolumn{2}{c}{Lustre 4.4\,PB}      \\ \bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}
+  \centering
+  \includegraphics[width=.9\columnwidth]{figs/rack.jpg}
+  \caption{AOBA-Sの外観}\label{fig:rack}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \includegraphics[width=.9\columnwidth]{figs/ve30.jpg}
+  \caption{Vector Engineカードの外観}\label{fig:rack}
+\end{figure}
+
+AOBA-Sは，504ノードのSX-Aurorao TSUBASA C401-8から構成されるスーパーコンピュータである．
+
+1ラックあたり16ノードが搭載されており，計32ラックから構成される．
 相互結合網にはInfiniBand
 NDRを採用しており，フルバイセクションバンド幅およびノンブロッキングの2段Fat-treeトポロジによって
-計算ノードおよびストレージノードが接続されている．計算ノード側のHCAにはInfiniBand NDR
+計算ノードおよびストレージノードが接続されている．
+2基のスパインスイッチおよび
+計算ノード側のHCAにはInfiniBand NDR
 200GのHCAが2枚搭載されている．計算ノード群2ラックにつき1つのInfiniBandスイッチに接続している．
 計算ノードのバイセクションバンド幅は，204.8\,Tbpsに達する．
+
+\begin{figure}
+  \centering
+  \includegraphics{figs/nw_topology.pdf}
+  \caption{Vector Engineカードの外観}\label{fig:rack}
+\end{figure}
 
 ストレージにはDDN社製ES400NVX2アプライアンスを採用している．
 1基のES400NVX2がLustre MDS/MDTとして動作し，もう1基のES400NVX2がOSS/OSTとして動作する．
 OSS/OST用ES400NVX2には4基のSS9012エンクロージャが接続され，合計332本の7200rpm ニアラインSAS
 HDDを搭載している．各ES400NVX2は8本のInfiniBand HDRリンクによって相互結合網に接続している．
+
+\section{HPL・HPCG性能}
+
+High Performance Linpack (HPL)~\cite{Dongarra2003}ベンチマークおよびHigh Performance Conjugate
+Gradients (HPCG)~\cite{Dongarra2016} ベンチマークを実行した．
+504 VHの全系実行では，HPLの性能が16.33\,PFLOP/s (実行効率82.4\%)，HPCG性能が913.1\,TFLOP/s 
+(実行効率4.61\%) なお，これらの性能はパラメータのチューニング等の最適化を実施する前の性能であり，
+今後チューニングを実施することにより，さらに性能が向上する予定である．
+
+\begin{figure}
+  \centering
+  \includegraphics{figs/hpl_hpcg.pdf}
+  \caption{HPLおよびHPCG性能}\label{fig:hpl-hpcg}
+\end{figure}
 
 \section{MPI通信性能}
 
@@ -133,18 +188,16 @@ NCC 5.0.1でコンパイルし，MPIライブラリにNEC MPI 3.4.0を用いた�
 \subsection{1対1通信}
 
 図\ref{fig:mpi-lat}に\verb|osu_latency|ベンチマークで計測したMPI 1対1通信のレイテンシを示す．
-1.55$\mu$s
+同一ノード内の同一PCIeスイッチに接続されたVE間の最低レイテンシは1.51\us であった．
+同一ノード内の別PCIeスイッチに接続されたVE間ではルートコンプレックスを経由する必要があり，
+レイテンシは1.88\us であった．
+ノード間 3.87\us
+ノード間 2.09\us
 
 \begin{figure}
   \centering
   \includegraphics{figs/mpi_latency.pdf}
   \caption{MPI 1対1通信のレイテンシ}\label{fig:mpi-lat}
-\end{figure}
-
-\begin{figure}
-  \centering
-  \includegraphics{figs/mpi_latency_vhve.pdf}
-  \caption{MPI 1対1通信のレイテンシ}\label{fig:mpi-lat-vh}
 \end{figure}
 
 図\ref{fig:mpi-lat}に\verb|osu_bandwidth|ベンチマークで計測したMPI 1対1通信のスループットを示す．
@@ -157,28 +210,35 @@ PCIe Gen 4 $\times$16の実効帯域幅31.508\,GB/sである．73.4\%
   \caption{MPI 1対1通信のスループット}\label{fig:bw}
 \end{figure}
 
-\begin{figure}
-  \centering
-  \includegraphics{figs/mpi_bandwidth_vhve.pdf}
-  \caption{MPI 1対1通信のスループット}\label{fig:bw-vh}
-\end{figure}
+\subsection{集団通信}
 
 \section{ストレージ性能}
 
-IOR 3.3.0を用いて並列ファイルシステムの性能を計測した．1VEにつきIORを1プロセスを起動し，
+IOR 3.3.0を用いて並列ファイルシステムのスループットを計測した．1VEにつきIORを1プロセスを起動し，
+1プロセスあたり1ファイルに書き込む設定で計測を実施した．
+
 計測に用いたコマンドは，
 \texttt{ior -w -r -a POSIX -F -Q 8 -C -e -g -b 16m -t 4m -s 250 -i 3}である．
 書き込み時のページキャッシュの効果を排除するため，\texttt{-e}オプションによってwrite完了時に
-\texttt{fsync()}を呼び出している．また，読み込み時のページキャッシュの効果を排除するため，書き込みを
-実行するVEと読み込みを実行するVEをずらす\texttt{-C}オプションを指定している．また，
-同一VHに接続されたVEはVH側においてページキャッシュを共有しているため，異なるVHを
-\texttt{-Q 8}
+\texttt{fsync()}を呼び出している．また，読み込み時のページキャッシュの効果を排除するため，書き込み
+プロセスと読み込みプロセスをずらす\texttt{-C}オプションを指定している．また，同一VHに接続された
+VEはVH側においてページキャッシュを共有するため，書き込みVEと読み込みVEがそれぞれ異なるVHに所属する
+ように\texttt{-Q 8}オプションによって書き込みと読み込みプロセスを8ランク分ずらしている．
+
+図\ref{fig:ior}に計測結果を示す．1024 VEにおいて書き込み49.2\,GB/s，読み込み39.0\,GB/sのスループット
+を達成した．
 
 \begin{figure}
   \centering
   \includegraphics{figs/ior.pdf}
   \caption{並列ファイルシステムのスループット}\label{fig:ior}
 \end{figure}
+
+\section{SPEChpc}
+
+\subsection{Tinyサイズ}
+
+\subsection{Largeサイズ}
 
 \subsection*{謝辞}
 
