@@ -18,7 +18,6 @@
 
 \begin{document}
 
-
 \title{ベクトル型スーパーコンピュータ「AOBA-S」の性能評価}
 
 \etitle{Performance Evaluation of a Vector Supercomputer ``AOBA-S''}
@@ -54,18 +53,31 @@ report the results of the initial performance evaluation that we have conducted 
 operation start of AOBA-S.
 \end{eabstract}
 
-%
-%\begin{jkeyword}
-%情報処理学会論文誌ジャーナル，\LaTeX，スタイルファイル，べからず集
-%\end{jkeyword}
-%
-%\begin{ekeyword}
-%IPSJ Journal, \LaTeX, style files, ``Dos and Dont's'' list
-%\end{ekeyword}
-
 \maketitle
 
 \section{はじめに}
+
+東北大学サイバーサイエンスセンター (以下本センター) では，1986年に高性能計算センターとして活動を
+開始して以来，SX-1 (日本電気製，0.57\,GFLOP/s) から一貫して，主力計算システムとして
+ベクトル型スーパーコンピュータを導入し，最先端の学術研究を強力に支援，推進してきた．
+本センターは全国の大学等の研究者が学術研究のために利用する全国共同利用施設であると同時に，
+全国の情報基盤センター群と連携した学際大規模情報基盤共同利用・共同研究拠点 (JHPCN) の構成拠点である．
+また，、「富岳」を中核とする全国の計算機資源を連携した革新的ハイパフォーマンス・コンピューティング・
+インフラ (HPCI) の構成機関でもあ り、共同研究活動を推進する拠点となっている．
+
+このような背景の下，本センターでは2020年10月にベクトル型スーパーコンピュータ「AOBA-A」および
+スカラ型並列コンピュータ「AOBA-B」を導入し，高速で大規模な計算処理環境を提供している．
+両サブシステムの利用率は常に高く，計算需要が処理能力を超える状況続いてきた．この
+2022年10月にはクラウド上システムAOBA-Cによって計算能力の一時的な増強を実施したものの，
+次期スーパーコンピュータ「AOBA-S」の構想・設計を進めてきた．AOBA-Sは2022年4月に入札公示を行い，
+2022年8月に日本電気株式会社が落札し，2023年8月より利用者へのサービス提供を開始した．
+
+AOBA-SはAOBA-Aに比較すると14倍以上のピーク演算性能と11倍以上のピークメモリ帯域幅を有し，
+原稿執筆時点の2023年8月現在では，世界最高性能のベクトル型スーパーコンピュータである．
+AOBA-Sの中核であるVector Engine Type 30AプロセッサはVector Engineプロセッサの第3世代であり，
+第2世代に比べると演算性能やメモリ帯域幅等の基本性能の向上に加え，大幅にアーキテクチャが改善されている．
+そのため，ピーク演算性能やピークメモリ帯域幅の向上以上にアプリケーションの性能向上が期待できるため，
+運用に先駆けて各種性能評価を実施した．
 
 \section{AOBA-Sのアーキテクチャ}
 
@@ -88,8 +100,8 @@ NDR 200G HCAが搭載されており，VHおよびVE間の通信手段として�
 
 図\ref{fig:ve30}にVector Engine Type 30A (VE30)プロセッサの概要を示す．VE30はVector
 Engineプロセッサの第3世代となるプロセッサである．VE30は16個のベクトルコアを搭載し，これらの
-ベクトル・コアが2次元メッシュ型Network on Chip
-(NoC)によって接続されている．ベクトルコア群はNoCによって6.4\,TB/sの帯域幅を有するLast Level Cache 
+ベクトルコアが2次元メッシュ型Network on Chip (NoC)によって接続されている．
+ベクトルコア群はNoCによって6.4\,TB/sの帯域幅を有するLast Level Cache 
 (LLC) に接続しており，さらにLLCは2.45\,TB/sの帯域幅を有する96\,GBのHBM2Eメモリに接続している．
 各ベクトルコアはScalar Processing Unit (SPU) とVector Processing Unit (VPU) という2種の実行ユニット
 を搭載している．SPUは命令をフェッチ，デコードし，VPUへベクトル命令を発行する．VPUはベクトル命令を
@@ -131,38 +143,119 @@ VHメモリ容量    & 256\,GB        & 126\,TB                \\ \midrule
 \begin{figure}
   \centering
   \includegraphics[width=.9\columnwidth]{figs/rack.jpg}
-  \caption{AOBA-Sの外観}\label{fig:rack}
+  \caption{AOBA-Sの外観}\label{fig:aoba-s}
 \end{figure}
 
 \begin{figure}
   \centering
   \includegraphics[width=.9\columnwidth]{figs/ve30.jpg}
-  \caption{Vector Engineカードの外観}\label{fig:rack}
+  \caption{Vector Engine Type 30Aの外観}\label{fig:ve-card}
 \end{figure}
 
 AOBA-Sは，504ノードのSX-Aurorao TSUBASA C401-8から構成されるスーパーコンピュータである．
 
-1ラックあたり16ノードが搭載されており，計32ラックから構成される．
-相互結合網にはInfiniBand
-NDRを採用しており，フルバイセクションバンド幅およびノンブロッキングの2段Fat-treeトポロジによって
-計算ノードおよびストレージノードが接続されている．
-2基のスパインスイッチおよび
-計算ノード側のHCAにはInfiniBand NDR
-200GのHCAが2枚搭載されている．計算ノード群2ラックにつき1つのInfiniBandスイッチに接続している．
-計算ノードのバイセクションバンド幅は，204.8\,Tbpsに達する．
+相互結合網にはInfiniBand NDRを採用しており，図\ref{fig:topo}に示すように，
+フルバイセクション帯域幅およびノンブロッキングの2段Fat-treeトポロジによって計算ノード，
+ストレージノード，およびフロントエンドノードが接続されている．相互結合網は16基のスパインスイッチおよび
+18基のリーフスイッチによって構成される．リーフスイッチのうち16基には計算ノードが接続されており，
+残りの2基にはストレージおよびフロントエンドノードが接続されている．計算ノードが接続されている
+各リーフスイッチには32 VH (64 HCA) が接続されている．スパインスイッチとリーフスイッチの間は2本の
+400\,Gbpsリンクによって接続されており，計算ノード部分のバイセクション帯域幅は204.8\,Tbpsに達する．
 
 \begin{figure}
   \centering
   \includegraphics{figs/nw_topology.pdf}
-  \caption{Vector Engineカードの外観}\label{fig:rack}
+  \caption{AOBA-S相互結合網のトポロジ}\label{fig:topo}
 \end{figure}
 
 ストレージにはDDN社製ES400NVX2アプライアンスを採用している．
 1基のES400NVX2がLustre MDS/MDTとして動作し，もう1基のES400NVX2がOSS/OSTとして動作する．
-OSS/OST用ES400NVX2には4基のSS9012エンクロージャが接続され，合計332本の7200rpm ニアラインSAS
+OSS/OST用ES400NVX2には4基のSS9012エンクロージャが接続され，合計332本の7200\,rpm NL-SAS
 HDDを搭載している．各ES400NVX2は8本のInfiniBand HDRリンクによって相互結合網に接続している．
 
-\section{HPL・HPCG性能}
+\section{性能評価結果}
+
+\subsection{プロセッサ単体性能}
+
+本節では，業界標準のベンチマークであるBabelStream~\cite{Deakin2018}，
+High Performance Linpack (HPL)~\cite{Dongarra2003}，およびHigh Performance Conjugate
+Gradients (HPCG)~\cite{Dongarra2016}を用いてVE30プロセッサの単体性能を同世代の他プロセッサと比較する．
+比較対象のプロセッサは，前世代のVEであるVE Type 20B，富士通A64FX，Intel Xeon Platinum 8368
+(IceLake)，NVIDIA A100 40\,GBおよび80\,GBモデルである．HPLおよびHPCGのバイナリには，
+各プロセッサのベンダより提供されている最適化されたバイナリを使用した．なおA64FXについてはバイナリを
+入手できなかったため，Top500に掲載されている全系実行の性能より推定した．各プロセッサの諸元については，
+文献~\cite{Takahashi2023}を参照されたい．
+
+\subsubsection{基本性能}
+
+図\ref{fig:stream}にBabelStream v4.0によって計測した各プロセッサの実効メモリ帯域幅を示す．
+VE30の実効メモリ帯域幅は1.79\,TB/sとなり，他のすべてのプロセッサより高い性能となった．
+一方，ピークメモリ帯域幅に対する効率は72\%であり，これはA100 40\,GBモデルの91\%や80\,GBモデルの
+86\%に比べると低い．これは，VEのキャッシュラインサイズが128\,Bであるのに対し，GPUの
+キャッシュラインサイズが256\,Bと2倍の大きさであるため，STREAMのように粒度の粗い連続アクセスにおいて
+GPUが有利であることに起因している可能性がある．
+
+\begin{figure}
+  \centering
+  \includegraphics{figs/stream.pdf}
+  \caption{BabelStream性能~\cite{Takahashi2023}}\label{fig:stream}
+\end{figure}
+
+図\ref{fig:hpl}にHPLベンチマークの性能を示す．HPLは演算律速なベンチマークであるため，ピーク演算性能が
+高いA100 40\,GBモデルと80\,GBモデルの実効性能が11.8\,TFLOP/sと12.5\,TFLOP/sと非常に高い．
+一方，実行効率は60\%台とVEやA64FXに比べると低い．
+実行中に\verb|nvidia-smi|コマンドでGPUの周波数を監視すると周波数が低下しており，
+PCIe版では電力供給が不足し，パワースロットリングによって性能低下していると考えられる．
+VE30の性能は4.43\,TFLOP/sとなり，A100の両モデルに次いで最も高くなった．実行効率は90\%であり，実行中に
+\verb|vecmd|コマンドで周波数を監視したところ，パワースロットリングは発生していなかった．
+
+\begin{figure}
+  \centering
+  \includegraphics{figs/hpl.pdf}
+  \caption{HPL性能~\cite{Takahashi2023}}\label{fig:hpl}
+\end{figure}
+
+図\ref{fig:hpcg}にHPCGベンチマークの性能を示す．VE30におけるHPCGベンチマークの性能は258\,GFLOP/sであり，
+A100 80\,GBモデルの259\,GFLOP/sとほぼ同等の結果となった．実行効率は5.2\%であり，A100 80\,GBモデルの
+2倍となった．
+
+\begin{figure}
+  \centering
+  \includegraphics{figs/hpcg.pdf}
+  \caption{HPCG性能~\cite{Takahashi2023}}\label{fig:hpcg}
+\end{figure}
+
+\subsubsection{東北大カーネル集}
+
+実アプリケーションにおける性能を計測するため，本センターの利用者が開発した
+アプリケーションから抽出したカーネルのカタログである東北大カーネル集の性能を測定した．
+東北大カーネル集は，表\ref{tbl:isc-kernels}に示す6つのカーネルからなる．それぞれのカーネルは表に示す通り，
+それぞれ律速要因が異なる．
+
+\begin{table}
+\caption{東北大カーネル集}\label{tbl:isc-kernels}
+\begin{tabular}{@{}lll@{}}
+\toprule
+カーネル名                          & 科学分野        & 律速要因            \\ \midrule
+Earthquake~\cite{Ariyoshi2007}      & 地震学          & メモリ帯域幅        \\
+Turbulent Flow~\cite{Tsukahara2007} & 流体力学        & LLC帯域幅           \\
+Antenna~\cite{Sato2011}             & 電波工学        & メモリ帯域幅        \\
+Land Mine~\cite{Sato2003}           & 電波工学        & メモリ帯域幅        \\
+Turbine~\cite{Tsukahara2007}        & 流体力学        & メモリレイテンシ    \\
+Plasma~\cite{Katoh2005}             & プラズマ科学    & メモリレイテンシ    \\ \bottomrule
+\end{tabular}
+\end{table}
+
+図\ref{fig:isc-kernels}にVE20およびVE30における東北大カーネル集の性能を示す．VE30では，新設された
+L3キャッシュの効果を明らかにするため，L3キャッシュをバイパスした際の性能も合わせて示している．
+
+\begin{figure}
+  \centering
+  \includegraphics{figs/isc_kernels.pdf}
+  \caption{東北大カーネル集の性能}\label{fig:isc-kernels}
+\end{figure}
+
+\subsection{HPL・HPCG性能}
 
 High Performance Linpack (HPL)~\cite{Dongarra2003}ベンチマークおよびHigh Performance Conjugate
 Gradients (HPCG)~\cite{Dongarra2016} ベンチマークを実行した．
@@ -176,7 +269,7 @@ Gradients (HPCG)~\cite{Dongarra2016} ベンチマークを実行した．
   \caption{HPLおよびHPCG性能}\label{fig:hpl-hpcg}
 \end{figure}
 
-\section{MPI通信性能}
+\subsection{MPI通信性能}
 
 OSU Micro-Benchmarks
 7.2\footnote{\url{https://mvapich.cse.ohio-state.edu/benchmarks/}}を用いてMPI通信の性能を計測した．
@@ -185,7 +278,7 @@ NCC 5.0.1でコンパイルし，MPIライブラリにNEC MPI 3.4.0を用いた�
 同一ノード内の異なるPCIeスイッチに接続されたVE間，(3) 同一ラックの異なるノードに接続されたVE間，
 の3パターンを計測した．
 
-\subsection{1対1通信}
+\subsubsection{1対1通信}
 
 図\ref{fig:mpi-lat}に\verb|osu_latency|ベンチマークで計測したMPI 1対1通信のレイテンシを示す．
 同一ノード内の同一PCIeスイッチに接続されたVE間の最低レイテンシは1.51\us であった．
@@ -210,12 +303,12 @@ PCIe Gen 4 $\times$16の実効帯域幅31.508\,GB/sである．73.4\%
   \caption{MPI 1対1通信のスループット}\label{fig:bw}
 \end{figure}
 
-\subsection{集団通信}
+\subsubsection{集団通信}
 
-\section{ストレージ性能}
+\subsection{ストレージ性能}
 
-IOR 3.3.0を用いて並列ファイルシステムのスループットを計測した．1VEにつきIORを1プロセスを起動し，
-1プロセスあたり1ファイルに書き込む設定で計測を実施した．
+IOR 3.3.0\footnote{\url{https://github.com/hpc/ior}}を用いて並列ファイルシステムのスループットを計測した．
+1VEにつきIORを1プロセスを起動し，1プロセスあたり1ファイルに書き込む設定で計測を実施した．
 
 計測に用いたコマンドは，
 \texttt{ior -w -r -a POSIX -F -Q 8 -C -e -g -b 16m -t 4m -s 250 -i 3}である．
@@ -234,11 +327,11 @@ VEはVH側においてページキャッシュを共有するため，書き込�
   \caption{並列ファイルシステムのスループット}\label{fig:ior}
 \end{figure}
 
-\section{SPEChpc}
+\subsection{SPEChpc}
 
-\subsection{Tinyサイズ}
+\subsubsection{Tinyサイズ}
 
-\subsection{Largeサイズ}
+\subsubsection{Largeサイズ}
 
 \subsection*{謝辞}
 
