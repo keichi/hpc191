@@ -1,0 +1,33 @@
+set term pdfcairo enhanced size 3in, 2in font "Helvetical,9"
+
+set grid noxtics
+
+set style data histograms
+set style histogram rowstacked
+set style fill solid 1.00 noborder
+set boxwidth 0.8 relative
+
+set style line  1 lt 1 lc rgb '#4E79A7'
+set style line  2 lt 1 lc rgb '#F28E2B'
+set style line  3 lt 1 lc rgb '#E15759'
+set style line  4 lt 1 lc rgb '#76B7B2'
+set style line  5 lt 1 lc rgb '#59A14E'
+set style line  6 lt 1 lc rgb '#EDC949'
+set style line  7 lt 1 lc rgb '#B07AA2'
+set style line  8 lt 1 lc rgb '#FF9DA7'
+set style line  9 lt 1 lc rgb '#9C755F'
+set style line 10 lt 1 lc rgb '#BAB0AC'
+
+set output "spechpc_profile.pdf"
+set ylabel "Runtime [s]" offset 0.5
+
+set key box outside top center maxrow 1
+
+set xtics rotate by -30 scale 0
+
+plot "spechpc_profile.dat" using 3:xtic(1) ls 1 title "Computation", \
+     "spechpc_profile.dat" using 4:xtic(1) ls 2 title "MPI Communication"
+
+unset output
+
+system "pdfcrop spechpc_profile.pdf spechpc_profile.pdf"

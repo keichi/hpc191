@@ -58,7 +58,7 @@ operation start of AOBA-S.
 \section{はじめに}
 
 東北大学サイバーサイエンスセンター (以下本センター) では，1986年に高性能計算センターとして活動を
-開始して以来，SX-1 (日本電気製，0.57\,GFLOP/s) から一貫して，主力計算システムとして
+開始して以来，SX-1 (NEC製，0.57\,GFLOP/s) から一貫して，主力計算システムとして
 ベクトル型スーパーコンピュータを導入し，最先端の学術研究を強力に支援，推進してきた．
 本センターは全国の大学等の研究者が学術研究のために利用する全国共同利用施設であると同時に，
 全国の情報基盤センター群と連携した学際大規模情報基盤共同利用・共同研究拠点 (JHPCN) の構成拠点である．
@@ -77,9 +77,19 @@ AOBA-SはAOBA-Aに比較すると14倍以上のピーク演算性能と11倍以�
 AOBA-Sの中核であるVector Engine Type 30AプロセッサはVector Engineプロセッサの第3世代であり，
 第2世代に比べると演算性能やメモリ帯域幅等の基本性能の向上に加え，大幅にアーキテクチャが改善されている．
 そのため，ピーク演算性能やピークメモリ帯域幅の向上以上にアプリケーションの性能向上が期待できるため，
-運用に先駆けて各種性能評価を実施した．
+運用に先駆けて各種性能評価を実施した．本稿では，性能評価の結果について報告する．
 
-\section{AOBA-Sのアーキテクチャ}
+\section{スーパーコンピュータ「AOBA-S」}
+
+\subsection{概要}
+
+AOBA-Sは，504ノードのNEC製SX-Aurorao TSUBASA C401-8から構成されるスーパーコンピュータである．
+
+\begin{figure}
+  \centering
+  \includegraphics[width=.9\columnwidth]{figs/rack.jpg}
+  \caption{AOBA-Sの外観}\label{fig:aoba-s}
+\end{figure}
 
 \subsection{SX-Aurora TSUBASA C401-8}
 
@@ -89,13 +99,19 @@ SX-Aurora TSUBASAはVector Host (VH) とVector Engine (VE) の2種のプロセ�
 密結合されたことにより．VHはVEから発行されたI/O等のOS処理を担うためのx86\_64プロセッサである．
 SX-AT C401-8はVHとして64コアのAMD EPYC 7763 CPUを採用しており，各ノードに8基のVector Engine Type
 30Aカードを搭載している．8基のVEは2基ずつ共有するPCIeスイッチを経由し，VHに接続している．
-VEは1基あたり96\,GBのHBM2Eメモリ，VHは256GBのDDR4メモリを搭載している．また，VHには2基のInfiniBand
+VEは1基あたり96\,GBのHBM2Eメモリ，VHは256\,GBのDDR4メモリを搭載している．また，VHには2基のInfiniBand
 NDR 200G HCAが搭載されており，VHおよびVE間の通信手段として利用することが可能である．
 
 \begin{figure}
   \centering
   \includegraphics{figs/node_arch.pdf}
   \caption{SX-Aurora TSUBASA C401-8の構成}\label{fig:node}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \includegraphics[width=.9\columnwidth]{figs/ve30.jpg}
+  \caption{Vector Engine Type 30Aの外観}\label{fig:ve-card}
 \end{figure}
 
 図\ref{fig:ve30}にVector Engine Type 30A (VE30)プロセッサの概要を示す．VE30はVector
@@ -140,19 +156,10 @@ VHメモリ容量    & 256\,GB        & 126\,TB                \\ \midrule
 \end{tabular}
 \end{table}
 
-\begin{figure}
-  \centering
-  \includegraphics[width=.9\columnwidth]{figs/rack.jpg}
-  \caption{AOBA-Sの外観}\label{fig:aoba-s}
-\end{figure}
-
-\begin{figure}
-  \centering
-  \includegraphics[width=.9\columnwidth]{figs/ve30.jpg}
-  \caption{Vector Engine Type 30Aの外観}\label{fig:ve-card}
-\end{figure}
-
 AOBA-Sは，504ノードのSX-Aurorao TSUBASA C401-8から構成されるスーパーコンピュータである．
+物理的には1ラックに16 VHが搭載されており，32ラックに計504 VHが収容されている．
+これに加え，フロントエンドサーバ群および管理・監視サーバに2ラック，ネットワーク機器が2ラック，
+UPSが3ラック，ストレージが1ラックの計8ラックに収容されている．
 
 相互結合網にはInfiniBand NDRを採用しており，図\ref{fig:topo}に示すように，
 フルバイセクション帯域幅およびノンブロッキングの2段Fat-treeトポロジによって計算ノード，
@@ -174,6 +181,8 @@ OSS/OST用ES400NVX2には4基のSS9012エンクロージャが接続され，合
 HDDを搭載している．各ES400NVX2は8本のInfiniBand HDRリンクによって相互結合網に接続している．
 
 \section{性能評価結果}
+
+本節では，
 
 \subsection{プロセッサ単体性能}
 
@@ -281,6 +290,7 @@ NCC 5.0.1でコンパイルし，MPIライブラリにNEC MPI 3.4.0を用いた�
 \subsubsection{1対1通信}
 
 図\ref{fig:mpi-lat}に\verb|osu_latency|ベンチマークで計測したMPI 1対1通信のレイテンシを示す．
+\verb|-i 1000 -x 500|
 同一ノード内の同一PCIeスイッチに接続されたVE間の最低レイテンシは1.51\us であった．
 同一ノード内の別PCIeスイッチに接続されたVE間ではルートコンプレックスを経由する必要があり，
 レイテンシは1.88\us であった．
@@ -329,9 +339,39 @@ VEはVH側においてページキャッシュを共有するため，書き込�
 
 \subsection{SPEChpc}
 
+SPEChpc 1.1.7
+
 \subsubsection{Tinyサイズ}
 
 \subsubsection{Largeサイズ}
+
+Largeサイズの実行結果はSPEC公式サイトでも未だ限られているので
+\footnote{\url{https://www.spec.org/hpc2021/results/}}，ここでは文献~\cite{Brunst2022}において計測が
+なされた，独J\"{u}lich Supercomputing Centreが運用するJUWELS Booster上での性能測定結果と比較する．
+JUWELS BoosterはAMD EPYC 7402を2ソケットとNVIDIA A100 SXM4
+40\,GBを4基搭載した計算ノード936台から構成される．相互結合網にはDragonFly+トポロジを採用し，ノード
+あたりInfiniBand HDR200を4ポート備える．
+
+図\ref{fig:spechpc-profile}に各ベンチマークの実行時間に占めるMPI通信時間を示す．なお，
+本プロファイラを利用するには，\verb|-mpiprof|コンパイラオプションを用いて
+実行時に\verb|NMPI_PROGINF|環境変数に\verb|YES|を設定する．
+
+NEC MPI\footnote{\url{https://sxauroratsubasa.sakura.ne.jp/documents/mpi/pdfs/g2am01-NEC_MPI_User_Guide_ja.pdf}}
+
+BoosterではNVLink 3.0によってノード内のGPUが全結合されており，GPU間のリンク帯域幅は片方向200\,GB/s
+である．一方，AOBA-SではVE間はルートコンプレックスを根とするツリー型トポロジで接続されており，
+リンク帯域幅は30.5\,GB/sである．したがって，Boosterのノード内バイセクション帯域幅は800\,GB/sである
+一方，AOBA-Sは30.5\,GB/sと，26倍以上の差がある．
+また，Boosterではノード間接続の帯域幅はノードあたり800\,Gbpsであるが，AOBA-Sでは400\,Gbpsであり，
+2倍の差がある．これらの理由により，BoosterではMPI通信時間が短いと推測される．
+
+\begin{figure}
+  \centering
+  \includegraphics{figs/spechpc_profile.pdf}
+  \caption{SPEChpc Largeサイズの実行時間内訳}\label{fig:spechpc-profile}
+\end{figure}
+
+\section{おわりに}
 
 \subsection*{謝辞}
 
