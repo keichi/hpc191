@@ -1,0 +1,59 @@
+set term pdfcairo enhanced size 1.5in, 1.3in font "Helvetical,9"
+
+set grid
+
+set style fill solid border
+
+set style line  1 lt 1 ps 0.7 pt  2 lw 2 lc rgb '#4E79A7'
+set style line  2 lt 1 ps 0.7 pt  4 lw 2 lc rgb '#F28E2B'
+set style line  3 lt 1 ps 0.7 pt  8 lw 2 lc rgb '#E15759'
+set style line  4 lt 1 ps 0.7 pt  4 lw 2 lc rgb '#76B7B2'
+set style line  5 lt 1 ps 0.7 pt  6 lw 2 lc rgb '#59A14E'
+set style line  6 lt 1 ps 0.7 pt  8 lw 2 lc rgb '#EDC949'
+set style line  7 lt 1 ps 0.7 pt 10 lw 2 lc rgb '#B07AA2'
+set style line  8 lt 1 ps 0.7 pt 12 lw 2 lc rgb '#FF9DA7'
+set style line  9 lt 1 ps 0.7 pt 14 lw 2 lc rgb '#9C755F'
+set style line 10 lt 1 ps 0.7 pt 16 lw 2 lc rgb '#BAB0AC'
+
+set logscale x
+set xrange [300:1800]
+set yrange [0:*]
+set xlabel "# of VEs/GPUs" offset 0, 0.5
+set ylabel "Speedup over baseline" offset 1.5
+set key top left samplen 2 box
+
+set output "spechpc_lbm_l.pdf"
+plot "spechpc_large.dat" using 1:2 w lp ls 1 title "AOBA-S", \
+     "spechpc_large_booster.dat" using 1:2 w lp ls 2 title "Booster"
+unset output
+system "pdfcrop spechpc_lbm_l.pdf spechpc_lbm_l.pdf"
+
+set output "spechpc_tealeaf_l.pdf"
+plot "spechpc_large.dat" using 1:3 w lp ls 1 title "AOBA-S", \
+     "spechpc_large_booster.dat" using 1:3 w lp ls 2 title "Booster"
+unset output
+system "pdfcrop spechpc_tealeaf_l.pdf spechpc_tealeaf_l.pdf"
+
+set output "spechpc_clvleaf_l.pdf"
+plot "spechpc_large.dat" using 1:4 w lp ls 1 title "AOBA-S", \
+     "spechpc_large_booster.dat" using 1:4 w lp ls 2 title "Booster"
+unset output
+system "pdfcrop spechpc_clvleaf_l.pdf spechpc_clvleaf_l.pdf"
+
+set output "spechpc_pot3d_l.pdf"
+plot "spechpc_large.dat" using 1:5 w lp ls 1 title "AOBA-S", \
+     "spechpc_large_booster.dat" using 1:5 w lp ls 2 title "Booster"
+unset output
+system "pdfcrop spechpc_pot3d_l.pdf spechpc_pot3d_l.pdf"
+
+set output "spechpc_hpgmgfv_l.pdf"
+plot "spechpc_large.dat" using 1:6 w lp ls 1 title "AOBA-S", \
+     "spechpc_large_booster.dat" using 1:6 w lp ls 2 title "Booster"
+unset output
+system "pdfcrop spechpc_hpgmgfv_l.pdf spechpc_hpgmgfv_l.pdf"
+
+set output "spechpc_weather_l.pdf"
+plot "spechpc_large.dat" using 1:7 w lp ls 1 title "AOBA-S", \
+     "spechpc_large_booster.dat" using 1:7 w lp ls 2 title "Booster"
+unset output
+system "pdfcrop spechpc_weather_l.pdf spechpc_weather_l.pdf"

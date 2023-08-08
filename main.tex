@@ -5,11 +5,12 @@
 \usepackage[japanese]{babel}
 \usepackage[scaled]{beramono}
 \usepackage{booktabs}
+\usepackage{caption}
 \usepackage[T1]{fontenc}
 \usepackage[dvipdfmx]{graphicx}
 \usepackage[utf8]{inputenc}
 \usepackage{listings}
-\usepackage[all, warning]{onlyamsmath}
+\usepackage[all,warning]{onlyamsmath}
 \usepackage{siunitx}
 \usepackage[subrefformat=parens]{subcaption}
 \usepackage{url}
@@ -85,13 +86,11 @@ AOBA-Sの中核であるVector Engine Type 30AプロセッサはVector Engineプ
 
 AOBA-Sは，504ノードのNEC製SX-Aurorao TSUBASA C401-8から構成されるスーパーコンピュータである．
 
-\begin{figure}
+\begin{figure}[tb]
   \centering
   \includegraphics[width=.9\columnwidth]{figs/rack.jpg}
   \caption{AOBA-Sの外観}\label{fig:aoba-s}
 \end{figure}
-
-\subsection{SX-Aurora TSUBASA C401-8}
 
 図\ref{fig:node}にAOBA-Sを構成するSX-Aurora TSUBASA (SX-AT) C401-8ノードの概念図を示す．
 SX-Aurora TSUBASAはVector Host (VH) とVector Engine (VE) の2種のプロセッサが搭載した
@@ -102,42 +101,13 @@ SX-AT C401-8はVHとして64コアのAMD EPYC 7763 CPUを採用しており，�
 VEは1基あたり96\,GBのHBM2Eメモリ，VHは256\,GBのDDR4メモリを搭載している．また，VHには2基のInfiniBand
 NDR 200G HCAが搭載されており，VHおよびVE間の通信手段として利用することが可能である．
 
-\begin{figure}
+\begin{figure}[tb]
   \centering
   \includegraphics{figs/node_arch.pdf}
   \caption{SX-Aurora TSUBASA C401-8の構成}\label{fig:node}
 \end{figure}
 
-\begin{figure}
-  \centering
-  \includegraphics[width=.9\columnwidth]{figs/ve30.jpg}
-  \caption{Vector Engine Type 30Aの外観}\label{fig:ve-card}
-\end{figure}
-
-図\ref{fig:ve30}にVector Engine Type 30A (VE30)プロセッサの概要を示す．VE30はVector
-Engineプロセッサの第3世代となるプロセッサである．VE30は16個のベクトルコアを搭載し，これらの
-ベクトルコアが2次元メッシュ型Network on Chip (NoC)によって接続されている．
-ベクトルコア群はNoCによって6.4\,TB/sの帯域幅を有するLast Level Cache 
-(LLC) に接続しており，さらにLLCは2.45\,TB/sの帯域幅を有する96\,GBのHBM2Eメモリに接続している．
-各ベクトルコアはScalar Processing Unit (SPU) とVector Processing Unit (VPU) という2種の実行ユニット
-を搭載している．SPUは命令をフェッチ，デコードし，VPUへベクトル命令を発行する．VPUはベクトル命令を
-実行する．SPUにはL1キャッシュとL2キャッシュが搭載されており，さらに，VE30ではSPUとVPUが共有する
-2\,MBのL3キャッシュが追加されている．
-
-\begin{figure}
-  \centering
-  \includegraphics{figs/ve30_memory_hierarchy.pdf}
-  \caption{VE30の概要図~\cite{Takahashi2023}}\label{fig:ve30}
-\end{figure}
-
-前世代のVE Type 20Aと比較すると，ベクトルコアあたりの計算性能とメモリアクセス性能を同一である一方，
-コア数が10コアから16コアへ1.6倍に増加している．また，コア数の増加に応じてメモリ帯域幅も1.53\,TB/sから
-2.54\,TB/sへ1.6倍に向上している．さらに，メモリ容量は48\,GBから96\,GBへ2倍に拡大され，LLCの容量は
-16\,MBから64\,MBへ4倍に拡大している．
-
-\subsection{AOBA-S}
-
-\begin{table}
+\begin{table}[tb]
 \centering
 \caption{AOBA-Sの性能諸元}\label{tbl:aoba-s}
 \begin{tabular}{@{}lll@{}}
@@ -156,7 +126,37 @@ VHメモリ容量    & 256\,GB        & 126\,TB                \\ \midrule
 \end{tabular}
 \end{table}
 
-AOBA-Sは，504ノードのSX-Aurorao TSUBASA C401-8から構成されるスーパーコンピュータである．
+\subsection{Vector Engine Type 30A (VE30)}
+
+\begin{figure}[tb]
+  \centering
+  \includegraphics[width=.9\columnwidth]{figs/ve30.jpg}
+  \caption{Vector Engine Type 30Aの外観}\label{fig:ve-card}
+\end{figure}
+
+図\ref{fig:ve30}にVector Engine Type 30A (VE30)プロセッサの概要を示す．VE30はVector
+Engineプロセッサの第3世代となるプロセッサである．VE30は16個のベクトルコアを搭載し，これらの
+ベクトルコアが2次元メッシュ型Network on Chip (NoC)によって接続されている．
+ベクトルコア群はNoCによって6.4\,TB/sの帯域幅を有するLast Level Cache 
+(LLC) に接続しており，さらにLLCは2.45\,TB/sの帯域幅を有する96\,GBのHBM2Eメモリに接続している．
+各ベクトルコアはScalar Processing Unit (SPU) とVector Processing Unit (VPU) という2種の実行ユニット
+を搭載している．SPUは命令をフェッチ，デコードし，VPUへベクトル命令を発行する．VPUはベクトル命令を
+実行する．SPUにはL1キャッシュとL2キャッシュが搭載されており，さらに，VE30ではSPUとVPUが共有する
+2\,MBのL3キャッシュが追加されている．
+
+\begin{figure}[tb]
+  \centering
+  \includegraphics{figs/ve30_memory_hierarchy.pdf}
+  \caption{VE30の概要図~\cite{Takahashi2023}}\label{fig:ve30}
+\end{figure}
+
+前世代のVE Type 20Aと比較すると，ベクトルコアあたりの計算性能とメモリアクセス性能を同一である一方，
+コア数が10コアから16コアへ1.6倍に増加している．また，コア数の増加に応じてメモリ帯域幅も1.53\,TB/sから
+2.54\,TB/sへ1.6倍に向上している．さらに，メモリ容量は48\,GBから96\,GBへ2倍に拡大され，LLCの容量は
+16\,MBから64\,MBへ4倍に拡大している．
+
+\subsection{相互結合網とストレージ}
+
 物理的には1ラックに16 VHが搭載されており，32ラックに計504 VHが収容されている．
 これに加え，フロントエンドサーバ群および管理・監視サーバに2ラック，ネットワーク機器が2ラック，
 UPSが3ラック，ストレージが1ラックの計8ラックに収容されている．
@@ -164,47 +164,76 @@ UPSが3ラック，ストレージが1ラックの計8ラックに収容され�
 相互結合網にはInfiniBand NDRを採用しており，図\ref{fig:topo}に示すように，
 フルバイセクション帯域幅およびノンブロッキングの2段Fat-treeトポロジによって計算ノード，
 ストレージノード，およびフロントエンドノードが接続されている．相互結合網は16基のスパインスイッチおよび
-18基のリーフスイッチによって構成される．リーフスイッチのうち16基には計算ノードが接続されており，
-残りの2基にはストレージおよびフロントエンドノードが接続されている．計算ノードが接続されている
-各リーフスイッチには32 VH (64 HCA) が接続されている．スパインスイッチとリーフスイッチの間は2本の
+18基のリーフスイッチによって構成される．各スイッチはNVIDIA Quantum-2 QM9700を採用している．
+リーフスイッチのうち16基には計算ノードが接続されており，
+残りの2基にはストレージおよび各種サーバ群が接続されている．計算ノードが接続されている
+各リーフスイッチには32 VH (64 HCA) が接続されている．各スパインスイッチとリーフスイッチの間は2本の
 400\,Gbpsリンクによって接続されており，計算ノード部分のバイセクション帯域幅は204.8\,Tbpsに達する．
 
-\begin{figure}
+\begin{figure}[tb]
   \centering
   \includegraphics{figs/nw_topology.pdf}
-  \caption{AOBA-S相互結合網のトポロジ}\label{fig:topo}
+  \caption{AOBA-Sの相互結合網}\label{fig:topo}
 \end{figure}
 
-ストレージにはDDN社製ES400NVX2アプライアンスを採用している．
-1基のES400NVX2がLustre MDS/MDTとして動作し，もう1基のES400NVX2がOSS/OSTとして動作する．
-OSS/OST用ES400NVX2には4基のSS9012エンクロージャが接続され，合計332本の7200\,rpm NL-SAS
-HDDを搭載している．各ES400NVX2は8本のInfiniBand HDRリンクによって相互結合網に接続している．
+ストレージには2基のDDN社製LustreアプライアンスであるES400NVX2を採用している．
+1基のES400NVX2がMDS/MDT機能を提供しており，仮想マシンとして4台のMDSが稼働している．
+MDTの実効容量は15.3\,TBであり，格納可能な最大i-node数は約55億である．
+もう1基のES400NVX2はOSS/OST機能を提供しており，仮想マシンとして4台のOSSが稼働している．
+OSS/OST用ES400NVX2には4基のSS9012エンクロージャが接続され，合計332本の7.2k\,rpm NL-SAS
+HDDを搭載している．各ES400NVX2は8本のInfiniBand HDR100リンクによって相互結合網に接続している．
+本ストレージは利用者毎の\verb|/uhome|領域として提供しているほか，
+課題参加者間でファイルを共有するための\verb|/short|も提供している．
+また，各ノードには1\,TBのSSDが搭載されており，高速一時領域\verb|/SSDTMP|として利用可能である．
 
-\section{性能評価結果}
+\subsection{ソフトウェア環境}
 
-本節では，
+利用者のプログラム開発環境として，高度な自動ベクトル化および自動並列化機能を備える
+NEC C/C++コンパイラとFortranコンパイラを提供している．これらのコンパイラはそれぞれ
+C++ 14/17とFortran 2008に準拠している．また，GNUツールチェーンの各種ツールがVE用に移植されており，
+プロファイラとして\verb|ngprof|，デバッガとして\verb|ve-gdb|が利用可能である．さらに
+プログラムの
+ベクトル化率，平均ベクトル長，キャッシュヒット率等をハードウェアパフォーマンスカウンタによって
+計測するためのツールとしてPROGINF，同様の情報を関数単位で計測するためのツールとしてFTRACEを
+提供している．
 
-\subsection{プロセッサ単体性能}
+数値計算ライブラリ集としてはNEC Numeric Library Collection
+(NLC) を提供しており，BLAS，LAPACK，SBLAS，ScaLAPACK，FFTW互換のインターフェースを通じて
+既存プログラムの移植を容易にしている．
 
-本節では，業界標準のベンチマークであるBabelStream~\cite{Deakin2018}，
-High Performance Linpack (HPL)~\cite{Dongarra2003}，およびHigh Performance Conjugate
-Gradients (HPCG)~\cite{Dongarra2016}を用いてVE30プロセッサの単体性能を同世代の他プロセッサと比較する．
+\section{性能評価}
+
+本節では，AOBA-Sのプロセッサよびシステム全体の多面的な性能評価結果について報告する．
+まず，\ref{sec:proc}節においてVE30プロセッサの単体性能を報告し，\ref{sec:hpl-hpcg}節において
+全系を用いたHPLおよびHPCGベンチマークの性能を報告する．
+\ref{sec:mpi}節と\ref{sec:storage}節においてそれぞれMPI通信性能とストレージの性能について報告する．
+最後に，\ref{sec:spechpc}節においてSPEChpcベンチマークスイート用いた実アプリケーションを想定した
+性能評価を実施する．
+
+\subsection{プロセッサ単体性能}\label{sec:proc}
+
+VE30プロセッサの単体性能を同世代の他プロセッサと比較する．
 比較対象のプロセッサは，前世代のVEであるVE Type 20B，富士通A64FX，Intel Xeon Platinum 8368
-(IceLake)，NVIDIA A100 40\,GBおよび80\,GBモデルである．HPLおよびHPCGのバイナリには，
-各プロセッサのベンダより提供されている最適化されたバイナリを使用した．なおA64FXについてはバイナリを
-入手できなかったため，Top500に掲載されている全系実行の性能より推定した．各プロセッサの諸元については，
-文献~\cite{Takahashi2023}を参照されたい．
+(IceLake)，NVIDIA A100 PCIe 40\,GBおよび80\,GBモデルである．
+各プロセッサの詳細な諸元については，文献~\cite{Takahashi2023}を参照されたい．
 
 \subsubsection{基本性能}
+
+まず，業界標準のベンチマークであるBabelStream~\cite{Deakin2018}，
+High Performance Linpack (HPL)~\cite{Dongarra2003}，およびHigh Performance Conjugate
+Gradients (HPCG)~\cite{Dongarra2016}を用いてVE30プロセッサの単体性能を同世代の他プロセッサと比較する．
+HPLおよびHPCGのバイナリには，
+各プロセッサのベンダより提供されている最適化されたバイナリを使用した．なおA64FXについてはバイナリを
+入手できなかったため，Top500に掲載されている全系実行の性能より推定した．
 
 図\ref{fig:stream}にBabelStream v4.0によって計測した各プロセッサの実効メモリ帯域幅を示す．
 VE30の実効メモリ帯域幅は1.79\,TB/sとなり，他のすべてのプロセッサより高い性能となった．
 一方，ピークメモリ帯域幅に対する効率は72\%であり，これはA100 40\,GBモデルの91\%や80\,GBモデルの
 86\%に比べると低い．これは，VEのキャッシュラインサイズが128\,Bであるのに対し，GPUの
-キャッシュラインサイズが256\,Bと2倍の大きさであるため，STREAMのように粒度の粗い連続アクセスにおいて
-GPUが有利であることに起因している可能性がある．
+キャッシュラインサイズが256\,Bと2倍の大きさであるため，STREAMのような連続メモリアクセスにおいて
+GPUが有利である可能性がある．
 
-\begin{figure}
+\begin{figure}[tb]
   \centering
   \includegraphics{figs/stream.pdf}
   \caption{BabelStream性能~\cite{Takahashi2023}}\label{fig:stream}
@@ -215,10 +244,12 @@ GPUが有利であることに起因している可能性がある．
 一方，実行効率は60\%台とVEやA64FXに比べると低い．
 実行中に\verb|nvidia-smi|コマンドでGPUの周波数を監視すると周波数が低下しており，
 PCIe版では電力供給が不足し，パワースロットリングによって性能低下していると考えられる．
-VE30の性能は4.43\,TFLOP/sとなり，A100の両モデルに次いで最も高くなった．実行効率は90\%であり，実行中に
-\verb|vecmd|コマンドで周波数を監視したところ，パワースロットリングは発生していなかった．
+VE30の性能は4.43\,TFLOP/sとなり，A100の両モデルに次いで最も高くなった．
+実行効率は90\%と高く，\verb|vecmd|\footnote{\url{https://sxauroratsubasa.sakura.ne.jp/documents/guide/pdfs/InstallationGuide_E.pdf}}
+コマンドで周波数を監視したところ，パワースロットリングは発生していなかった．よって，PCIeカードの
+電力制約内で安定して性能を発揮できていると言える．
 
-\begin{figure}
+\begin{figure}[tb]
   \centering
   \includegraphics{figs/hpl.pdf}
   \caption{HPL性能~\cite{Takahashi2023}}\label{fig:hpl}
@@ -228,7 +259,7 @@ VE30の性能は4.43\,TFLOP/sとなり，A100の両モデルに次いで最も�
 A100 80\,GBモデルの259\,GFLOP/sとほぼ同等の結果となった．実行効率は5.2\%であり，A100 80\,GBモデルの
 2倍となった．
 
-\begin{figure}
+\begin{figure}[tb]
   \centering
   \includegraphics{figs/hpcg.pdf}
   \caption{HPCG性能~\cite{Takahashi2023}}\label{fig:hpcg}
@@ -241,7 +272,7 @@ A100 80\,GBモデルの259\,GFLOP/sとほぼ同等の結果となった．実行
 東北大カーネル集は，表\ref{tbl:isc-kernels}に示す6つのカーネルからなる．それぞれのカーネルは表に示す通り，
 それぞれ律速要因が異なる．
 
-\begin{table}
+\begin{table}[tb]
 \caption{東北大カーネル集}\label{tbl:isc-kernels}
 \begin{tabular}{@{}lll@{}}
 \toprule
@@ -258,13 +289,13 @@ Plasma~\cite{Katoh2005}             & プラズマ科学    & メモリレイテ
 図\ref{fig:isc-kernels}にVE20およびVE30における東北大カーネル集の性能を示す．VE30では，新設された
 L3キャッシュの効果を明らかにするため，L3キャッシュをバイパスした際の性能も合わせて示している．
 
-\begin{figure}
+\begin{figure}[tb]
   \centering
   \includegraphics{figs/isc_kernels.pdf}
   \caption{東北大カーネル集の性能}\label{fig:isc-kernels}
 \end{figure}
 
-\subsection{HPL・HPCG性能}
+\subsection{HPL・HPCG性能}\label{sec:hpl-hpcg}
 
 High Performance Linpack (HPL)~\cite{Dongarra2003}ベンチマークおよびHigh Performance Conjugate
 Gradients (HPCG)~\cite{Dongarra2016} ベンチマークを実行した．
@@ -272,13 +303,13 @@ Gradients (HPCG)~\cite{Dongarra2016} ベンチマークを実行した．
 (実行効率4.61\%) なお，これらの性能はパラメータのチューニング等の最適化を実施する前の性能であり，
 今後チューニングを実施することにより，さらに性能が向上する予定である．
 
-\begin{figure}
+\begin{figure}[tb]
   \centering
   \includegraphics{figs/hpl_hpcg.pdf}
   \caption{HPLおよびHPCG性能}\label{fig:hpl-hpcg}
 \end{figure}
 
-\subsection{MPI通信性能}
+\subsection{MPI通信性能}\label{sec:mpi}
 
 OSU Micro-Benchmarks
 7.2\footnote{\url{https://mvapich.cse.ohio-state.edu/benchmarks/}}を用いてMPI通信の性能を計測した．
@@ -287,7 +318,7 @@ NCC 5.0.1でコンパイルし，MPIライブラリにNEC MPI 3.4.0を用いた�
 同一ノード内の異なるPCIeスイッチに接続されたVE間，(3) 同一ラックの異なるノードに接続されたVE間，
 の3パターンを計測した．
 
-\subsubsection{1対1通信}
+% \subsubsection{1対1通信}
 
 図\ref{fig:mpi-lat}に\verb|osu_latency|ベンチマークで計測したMPI 1対1通信のレイテンシを示す．
 \verb|-i 1000 -x 500|
@@ -297,7 +328,7 @@ NCC 5.0.1でコンパイルし，MPIライブラリにNEC MPI 3.4.0を用いた�
 ノード間 3.87\us
 ノード間 2.09\us
 
-\begin{figure}
+\begin{figure}[tb]
   \centering
   \includegraphics{figs/mpi_latency.pdf}
   \caption{MPI 1対1通信のレイテンシ}\label{fig:mpi-lat}
@@ -313,9 +344,9 @@ PCIe Gen 4 $\times$16の実効帯域幅31.508\,GB/sである．73.4\%
   \caption{MPI 1対1通信のスループット}\label{fig:bw}
 \end{figure}
 
-\subsubsection{集団通信}
+% \subsubsection{集団通信}
 
-\subsection{ストレージ性能}
+\subsection{ストレージ性能}\label{sec:storage}
 
 IOR 3.3.0\footnote{\url{https://github.com/hpc/ior}}を用いて並列ファイルシステムのスループットを計測した．
 1VEにつきIORを1プロセスを起動し，1プロセスあたり1ファイルに書き込む設定で計測を実施した．
@@ -331,19 +362,59 @@ VEはVH側においてページキャッシュを共有するため，書き込�
 図\ref{fig:ior}に計測結果を示す．1024 VEにおいて書き込み49.2\,GB/s，読み込み39.0\,GB/sのスループット
 を達成した．
 
-\begin{figure}
+\begin{figure}[tb]
   \centering
   \includegraphics{figs/ior.pdf}
-  \caption{並列ファイルシステムのスループット}\label{fig:ior}
+  \caption{並列ファイルシステムの読み書き性能}\label{fig:ior}
 \end{figure}
 
-\subsection{SPEChpc}
+\begin{figure}[tb]
+  \centering
+  \includegraphics{figs/mdtest.pdf}
+  \caption{並列ファイルシステムのメタデータ性能}\label{fig:mdtest}
+\end{figure}
+
+\subsection{SPEChpc}\label[sec:spechpc]
 
 SPEChpc 1.1.7
 
 \subsubsection{Tinyサイズ}
 
 \subsubsection{Largeサイズ}
+
+\begin{figure}[tb]
+  \begin{minipage}[b]{0.45\hsize}
+    \centering
+    \includegraphics{figs/spechpc_lbm_l.pdf}
+    \subcaption{LBM}\label{fig:lbm-l}
+  \end{minipage}
+  \begin{minipage}[b]{0.45\hsize}
+    \centering
+    \includegraphics{figs/spechpc_tealeaf_l.pdf}
+    \subcaption{TeaLeaf}\label{fig:tealeaf-l}
+  \end{minipage} \\
+  \begin{minipage}[b]{0.45\hsize}
+    \centering
+    \includegraphics{figs/spechpc_clvleaf_l.pdf}
+    \subcaption{CloverLeaf}\label{fig:clvleaf-l}
+  \end{minipage}
+  \begin{minipage}[b]{0.45\hsize}
+    \centering
+    \includegraphics{figs/spechpc_pot3d_l.pdf}
+    \subcaption{POT3D}\label{fig:pot3d-l}
+  \end{minipage} \\
+  \begin{minipage}[b]{0.45\hsize}
+    \centering
+    \includegraphics{figs/spechpc_hpgmgfv_l.pdf}
+    \subcaption{HPGMG-FV}\label{fig:hpgmg-l}
+  \end{minipage}
+  \begin{minipage}[b]{0.45\hsize}
+    \centering
+    \includegraphics{figs/spechpc_weather_l.pdf}
+    \subcaption{miniWeather}\label{fig:weather-l}
+  \end{minipage}
+  \caption{SPEChpc Largeサイズの性能}\label{ラベル}
+\end{figure}
 
 Largeサイズの実行結果はSPEC公式サイトでも未だ限られているので
 \footnote{\url{https://www.spec.org/hpc2021/results/}}，ここでは文献~\cite{Brunst2022}において計測が
@@ -365,7 +436,7 @@ BoosterではNVLink 3.0によってノード内のGPUが全結合されており
 また，Boosterではノード間接続の帯域幅はノードあたり800\,Gbpsであるが，AOBA-Sでは400\,Gbpsであり，
 2倍の差がある．これらの理由により，BoosterではMPI通信時間が短いと推測される．
 
-\begin{figure}
+\begin{figure}[tb]
   \centering
   \includegraphics{figs/spechpc_profile.pdf}
   \caption{SPEChpc Largeサイズの実行時間内訳}\label{fig:spechpc-profile}
