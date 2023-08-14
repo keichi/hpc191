@@ -19,7 +19,7 @@ set logscale x
 set xrange [2**4:2**10]
 #set yrange [*:10**4]
 set xlabel "# of Processes"
-set ylabel "Throughput [op/s]" offset 1
+set ylabel "Throughput [KIOps]" offset 1
 #set format xy "%2.0l{/Symbol \264}10^{%L}"
 set key top left samplen 2 box
 

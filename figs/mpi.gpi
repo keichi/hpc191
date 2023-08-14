@@ -39,7 +39,7 @@ set logscale x
 set xlabel "Message size [B]"
 set ylabel "Bandwidth [MB/s]" offset 3
 #set format xy "%2.0l{/Symbol \264}10^{%L}"
-set key top left samplen 2 box
+set key bottom right samplen 2 box
 
 set output "mpi_bandwidth.pdf"
 plot "mpi_p2p_bw_rack.dat" using 1:2 w lp ls 1 title "VE-VE (same rack)", \

@@ -15,8 +15,6 @@
 \usepackage[subrefformat=parens]{subcaption}
 \usepackage{url}
 
-\newcommand{\us}{\si{\micro\second}}
-
 \begin{document}
 
 \title{ベクトル型スーパーコンピュータ「AOBA-S」の性能評価}
@@ -32,7 +30,7 @@
 \author{藤本 壮也}{Soya Fujimoto}{NEC}[s-fujimoto@nec.com]
 \author{長瀬 悟}{Satoru Nagarase}{NEC}[s.nagase@nec.com]
 \author{磯部 洋子}{Yoko Isobe}{NEC}[y-isobe-pi@nec.com]
-\author{下村 陽一}{Yoichi Shimomura}{CSC,TU}[shimomura32@tohoku.ac.jp]
+\author{下村 陽一}{Yoichi Shimomura}{CSC}[shimomura32@tohoku.ac.jp]
 \author{江川 隆輔}{Ryusuke Egawa}{TDU}[egawa@mail.dendai.ac.jp]
 \author{滝沢 寛之}{Hiroyuki Takizawa}{CSC,TU}[takizawa@tohoku.ac.jp]
 
@@ -288,6 +286,12 @@ Plasma~\cite{Katoh2005}             & プラズマ科学    & メモリレイテ
 
 図\ref{fig:isc-kernels}にVE20およびVE30における東北大カーネル集の性能を示す．VE30では，新設された
 L3キャッシュの効果を明らかにするため，L3キャッシュをバイパスした際の性能も合わせて示している．
+まず，メモリ帯域幅に律速されるEarthquake, Antenna, Land MineではVE30はVE20に比べ1.6倍高速化しており，
+これはメモリ帯域幅の向上率と一致している．LLC帯域幅律速であるTurbulent Flowでは，2.26倍高速化
+してり，同じくLLC帯域幅の向上率2.13倍とほぼ一致している．
+メモリレイテンシ律速であるTurbineとPlasmaではそれぞれ2.39倍と2.42倍性能が向上しており，メモリ帯域幅
+やLLC帯域幅のいずれの向上率も超えている．
+これは新設されたL3キャッシュにヒットすることにより，メモリレイテンシが短縮していることに起因する．
 
 \begin{figure}[tb]
   \centering
@@ -295,12 +299,19 @@ L3キャッシュの効果を明らかにするため，L3キャッシュをバ�
   \caption{東北大カーネル集の性能}\label{fig:isc-kernels}
 \end{figure}
 
+% Earthquake	1.562433029	1.562414022
+% Turbulent Flow	2.269235107	1.987005372
+% Antenna	1.713382084	1.649130386
+% Land Mine	1.840124773	1.815984976
+% Turbine	2.39612046	1.941414462
+% Plasma	2.424101774	0.801012457
+
 \subsection{HPL・HPCG性能}\label{sec:hpl-hpcg}
 
-High Performance Linpack (HPL)~\cite{Dongarra2003}ベンチマークおよびHigh Performance Conjugate
-Gradients (HPCG)~\cite{Dongarra2016} ベンチマークを実行した．
-504 VHの全系実行では，HPLの性能が16.33\,PFLOP/s (実行効率82.4\%)，HPCG性能が913.1\,TFLOP/s 
-(実行効率4.61\%) なお，これらの性能はパラメータのチューニング等の最適化を実施する前の性能であり，
+HPLベンチマークおよびHPCGベンチマークを複数VH上で実行し，性能を計測した．
+504 VHを用いた全系実行では，HPL性能が16.33\,PFLOP/s (実行効率82.4\%)，HPCG性能が913.1\,TFLOP/s 
+(実行効率4.61\%) となった．
+なお，これらの性能はパラメータのチューニング等の最適化を未実施の状態での性能であるため，
 今後チューニングを実施することにより，さらに性能が向上する予定である．
 
 \begin{figure}[tb]
@@ -313,20 +324,19 @@ Gradients (HPCG)~\cite{Dongarra2016} ベンチマークを実行した．
 
 OSU Micro-Benchmarks
 7.2\footnote{\url{https://mvapich.cse.ohio-state.edu/benchmarks/}}を用いてMPI通信の性能を計測した．
-NCC 5.0.1でコンパイルし，MPIライブラリにNEC MPI 3.4.0を用いた．
-測定にあたっては，(1) 同一PCIeスイッチに接続されたVE間，(2)
-同一ノード内の異なるPCIeスイッチに接続されたVE間，(3) 同一ラックの異なるノードに接続されたVE間，
-の3パターンを計測した．
-
-% \subsubsection{1対1通信}
+測定にあたっては，(1) 同一PCIeスイッチ配下のVE間，(2)
+同一VH内の異なるPCIeスイッチ配下のVE間，(3) 同一ラックの異なるVH配下のVE間，
+(4) 同一ラックの異なるVH間，の4パターンを計測した．
+ベンチマークの実効においては\verb|-i 1000 -x 500|オプションを指定し，
+繰り返し回数を1,0000回，ウォームアップ回数を500回にそれぞれ設定した．
+MPIライブラリには，NECが提供するNEC MPI 3.4.0を用いた．
 
 図\ref{fig:mpi-lat}に\verb|osu_latency|ベンチマークで計測したMPI 1対1通信のレイテンシを示す．
-\verb|-i 1000 -x 500|
-同一ノード内の同一PCIeスイッチに接続されたVE間の最低レイテンシは1.51\us であった．
-同一ノード内の別PCIeスイッチに接続されたVE間ではルートコンプレックスを経由する必要があり，
-レイテンシは1.88\us であった．
-ノード間 3.87\us
-ノード間 2.09\us
+同一PCIeスイッチ配下のVE間における最低レイテンシは1.51$\mu$sであった．
+同一VH内の異なるPCIeスイッチ配下のVE間ではルートコンプレックスを経由する必要があるため，レイテンシが
+増加し，1.88$\mu$sとなった．同一ラックの異なるVH配下のVE間のレイテンシは3.87$\mu$sであった．
+これらのVE間のレイテンシは，GPU-awareなMPI実装\cite{Shafie2021,Shafie2022}と同等の値である．
+同一ラックの異なるVH間のレイテンシは2.09$\mu$sであった．
 
 \begin{figure}[tb]
   \centering
@@ -334,33 +344,38 @@ NCC 5.0.1でコンパイルし，MPIライブラリにNEC MPI 3.4.0を用いた�
   \caption{MPI 1対1通信のレイテンシ}\label{fig:mpi-lat}
 \end{figure}
 
-図\ref{fig:mpi-lat}に\verb|osu_bandwidth|ベンチマークで計測したMPI 1対1通信のスループットを示す．
-
-PCIe Gen 4 $\times$16の実効帯域幅31.508\,GB/sである．73.4\%
-
-\begin{figure}
+\begin{figure}[tb]
   \centering
   \includegraphics{figs/mpi_bandwidth.pdf}
   \caption{MPI 1対1通信のスループット}\label{fig:bw}
 \end{figure}
 
-% \subsubsection{集団通信}
+図\ref{fig:mpi-lat}に\verb|osu_bandwidth|ベンチマークで計測したMPI 1対1通信のスループットを示す．
+スループットではVE間の通信経路によって大きな差が見られず，
+同一PCIeスイッチ配下のVE間で23.1\,GB/s，同一VH内の異なるPCIeスイッチ配下のVE間で22.7\,GB/s，
+同一ラックの異なるVH配下のVE間で 23.6\,GB/sであった．
+InfiniBanad NDR200の理論帯域幅は25\,GB/sであるため，VHを跨ぐVE間通信のスループットは
+94\%と高い効率を達成している．一方，VH内のVE間通信ではPCIeリンク帯域幅が律速要因となるはずだが，
+PCIe Gen 4 $\times$16の理論帯域幅31.5\,GB/sに対して73\%程度の効率に留まっている．
+VH間のスループットは22.8\,GB/sとなり，VE間のスループットと同程度であったものの，
+32\,KiB以下のメッセージサイズではVH間のスループットがVE間に比べ3倍程度高かった．
+これはVHとVEのプロセッサの性能差に起因すると考えられる．
 
 \subsection{ストレージ性能}\label{sec:storage}
 
 IOR 3.3.0\footnote{\url{https://github.com/hpc/ior}}を用いて並列ファイルシステムのスループットを計測した．
-1VEにつきIORを1プロセスを起動し，1プロセスあたり1ファイルに書き込む設定で計測を実施した．
-
+1 VEにつきIORを1プロセスを起動し，プロセスごとに別ファイルに書き込む設定で計測を実施した．
 計測に用いたコマンドは，
 \texttt{ior -w -r -a POSIX -F -Q 8 -C -e -g -b 16m -t 4m -s 250 -i 3}である．
 書き込み時のページキャッシュの効果を排除するため，\texttt{-e}オプションによってwrite完了時に
 \texttt{fsync()}を呼び出している．また，読み込み時のページキャッシュの効果を排除するため，書き込み
-プロセスと読み込みプロセスをずらす\texttt{-C}オプションを指定している．また，同一VHに接続された
-VEはVH側においてページキャッシュを共有するため，書き込みVEと読み込みVEがそれぞれ異なるVHに所属する
-ように\texttt{-Q 8}オプションによって書き込みと読み込みプロセスを8ランク分ずらしている．
+プロセスと読み込みプロセスをずらす\texttt{-C}オプションを指定している．同一VHに接続された
+VEはVH側においてページキャッシュを共有するため，書き込みプロセスと読み込みプロセスがそれぞれ異なるVH
+配下のVE上で動作するよう，
+\texttt{-Q 8}オプションによって書き込みと読み込みプロセスを8ランク分ずらしている．
 
-図\ref{fig:ior}に計測結果を示す．1024 VEにおいて書き込み49.2\,GB/s，読み込み39.0\,GB/sのスループット
-を達成した．
+図\ref{fig:ior}に計測結果を示す．1,024プロセスにおいて書き込み49.2\,GB/s，読み込み39.0\,GB/sの
+スループットを達成した．
 
 \begin{figure}[tb]
   \centering
@@ -368,13 +383,16 @@ VEはVH側においてページキャッシュを共有するため，書き込�
   \caption{並列ファイルシステムの読み書き性能}\label{fig:ior}
 \end{figure}
 
+また，図\ref{fig:mdtest}にIORに付属するMDTESTを用いて計測した並列ファイルシステムのメタデータ性能を
+示す．メタデータ性能は512プロセス程度でピークに達し，File statの性能が189\,KIOpsとなった．
+
 \begin{figure}[tb]
   \centering
   \includegraphics{figs/mdtest.pdf}
   \caption{並列ファイルシステムのメタデータ性能}\label{fig:mdtest}
 \end{figure}
 
-\subsection{SPEChpc}\label[sec:spechpc]
+\subsection{SPEChpc}\label{sec:spechpc}
 
 SPEChpc 1.1.7
 
@@ -413,21 +431,21 @@ SPEChpc 1.1.7
     \includegraphics{figs/spechpc_weather_l.pdf}
     \subcaption{miniWeather}\label{fig:weather-l}
   \end{minipage}
-  \caption{SPEChpc Largeサイズの性能}\label{ラベル}
+  \caption{SPEChpc Largeサイズの性能}\label{fig:spechpc-l}
 \end{figure}
 
-Largeサイズの実行結果はSPEC公式サイトでも未だ限られているので
-\footnote{\url{https://www.spec.org/hpc2021/results/}}，ここでは文献~\cite{Brunst2022}において計測が
-なされた，独J\"{u}lich Supercomputing Centreが運用するJUWELS Booster上での性能測定結果と比較する．
-JUWELS BoosterはAMD EPYC 7402を2ソケットとNVIDIA A100 SXM4
-40\,GBを4基搭載した計算ノード936台から構成される．相互結合網にはDragonFly+トポロジを採用し，ノード
-あたりInfiniBand HDR200を4ポート備える．
+SPEChpcの公式ウェブサイト\footnote{\url{https://www.spec.org/hpc2021/results/}}において公開されている
+Largeサイズの計測結果は限られているため，ここでは文献~\cite{Brunst2022}において計測が
+なされた，米Texas Advanced Computing CenterのFronteraおよび独J\"{u}lich Supercomputing Centreの
+JUWELS Booster上での性能測定結果と比較する．FronteraはノードあたりIntel Xeon Platinum 8280を2
+ソケット搭載し，InfiniBand HDR100を1ポート備えるシステムである．
+BoosterはノードあたりAMD EPYC 7402を2ソケットとNVIDIA A100 SXM4 40\,GBを4基搭載し，
+InfiniBand HDR200を4ポート備えるシステムである．
 
-図\ref{fig:spechpc-profile}に各ベンチマークの実行時間に占めるMPI通信時間を示す．なお，
-本プロファイラを利用するには，\verb|-mpiprof|コンパイラオプションを用いて
-実行時に\verb|NMPI_PROGINF|環境変数に\verb|YES|を設定する．
+図\ref{fig:spechpc-l}は
 
-NEC MPI\footnote{\url{https://sxauroratsubasa.sakura.ne.jp/documents/mpi/pdfs/g2am01-NEC_MPI_User_Guide_ja.pdf}}
+図\ref{fig:spechpc-profile}にNEC MPI\footnote{\url{https://sxauroratsubasa.sakura.ne.jp/documents/mpi/pdfs/g2am01-NEC_MPI_User_Guide_ja.pdf}}
+のプロファイラ機能を用いて計測した，各ベンチマークの実行時間に占めるMPI通信時間を示す．
 
 BoosterではNVLink 3.0によってノード内のGPUが全結合されており，GPU間のリンク帯域幅は片方向200\,GB/s
 である．一方，AOBA-SではVE間はルートコンプレックスを根とするツリー型トポロジで接続されており，

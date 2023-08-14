@@ -1,6 +1,6 @@
 set term pdfcairo enhanced size 3in, 2in font "Helvetical,9"
 
-set grid noxtics
+set grid noxtics ytics
 
 set style data histograms
 set style histogram rowstacked
@@ -21,7 +21,8 @@ set style line 10 lt 1 lc rgb '#BAB0AC'
 set output "spechpc_profile.pdf"
 set ylabel "Runtime [s]" offset 0.5
 
-set key box outside top center maxrow 1
+# set key box outside top center maxrow 1
+set key top left box
 
 set xtics rotate by -30 scale 0
 
