@@ -1,0 +1,42 @@
+set term pdfcairo enhanced size 6in, 1.8in font "Helvetical,9" crop
+
+set grid
+set grid noxtics
+
+set boxwidth 0.8 absolute
+set style histogram clustered gap 2
+set style data histogram
+set style fill solid border
+
+set style line  1 lt 1 lc rgb '#4E79A7'
+set style line  2 lt 1 lc rgb '#4E79A7'
+set style line  3 lt 1 lc rgb '#F28E2B'
+set style line  4 lt 1 lc rgb '#F28E2B'
+set style line  5 lt 1 lc rgb '#E15759'
+set style line  6 lt 1 lc rgb '#76B7B2'
+set style line  7 lt 1 lc rgb '#59A14E'
+set style line  8 lt 1 lc rgb '#EDC949'
+set style line  9 lt 1 lc rgb '#B07AA2'
+set style line  10 lt 1 lc rgb '#FF9DA7'
+
+set yrange [0:37]
+set ytics nomirror
+
+set bmargin 2.5
+
+set ylabel "Speedup over Baseline System" offset 0.5
+
+set key box outside top center maxrow 1
+
+set output "spechpc_tiny.pdf"
+
+plot "spechpc_tiny.dat" every ::1 using 2:xtic(1) ls 1 title "VE20 x2", \
+     "spechpc_tiny.dat" every ::1 using 3 ls 3 title "VE30 x1", \
+     "spechpc_tiny.dat" every ::1 using 4 ls 6 title "A100 80GB x1", \
+     "spechpc_tiny.dat" every ::1 using 5 ls 5 title "A100 40GB x2", \
+     "spechpc_tiny.dat" every ::1 using 6 ls 7 title "A64FX x3", \
+     "spechpc_tiny.dat" every ::1 using 7 ls 8 title "IceLake-SP x1", \
+
+unset output
+
+system "pdfcrop spechpc_tiny.pdf spechpc_tiny.pdf"

@@ -71,18 +71,16 @@ operation start of AOBA-S.
 次期スーパーコンピュータ「AOBA-S」の構想・設計を進めてきた．AOBA-Sは2022年4月に入札公示を行い，
 2022年8月に日本電気株式会社が落札し，2023年8月より利用者へのサービス提供を開始した．
 
-AOBA-SはAOBA-Aに比較すると14倍以上のピーク演算性能と11倍以上のピークメモリ帯域幅を有し，
-原稿執筆時点の2023年8月現在では，世界最高性能のベクトル型スーパーコンピュータである．
+AOBA-SはAOBA-Aと比較すると14倍以上のピーク演算性能と11倍以上のピークメモリ帯域幅を有し，
+2023年8月現在では，世界最大規模かつ世界最高性能のベクトル型スーパーコンピュータである．
 AOBA-Sの中核であるVector Engine Type 30AプロセッサはVector Engineプロセッサの第3世代であり，
 第2世代に比べると演算性能やメモリ帯域幅等の基本性能の向上に加え，大幅にアーキテクチャが改善されている．
-そのため，ピーク演算性能やピークメモリ帯域幅の向上以上にアプリケーションの性能向上が期待できるため，
-運用に先駆けて各種性能評価を実施した．本稿では，性能評価の結果について報告する．
+そのため，ピーク演算性能やピークメモリ帯域幅の向上以上にアプリケーションの性能向上が期待できる．
+本稿では，運用に先駆けて実施した各種性能評価の結果について報告する．
 
 \section{スーパーコンピュータ「AOBA-S」}
 
 \subsection{概要}
-
-AOBA-Sは，504ノードのNEC製SX-Aurorao TSUBASA C401-8から構成されるスーパーコンピュータである．
 
 \begin{figure}[tb]
   \centering
@@ -90,6 +88,7 @@ AOBA-Sは，504ノードのNEC製SX-Aurorao TSUBASA C401-8から構成される�
   \caption{AOBA-Sの外観}\label{fig:aoba-s}
 \end{figure}
 
+AOBA-Sは，504ノードのNEC製SX-Aurora TSUBASA C401-8から構成されるスーパーコンピュータである．
 図\ref{fig:node}にAOBA-Sを構成するSX-Aurora TSUBASA (SX-AT) C401-8ノードの概念図を示す．
 SX-Aurora TSUBASAはVector Host (VH) とVector Engine (VE) の2種のプロセッサが搭載した
 ヘテロジニアスな計算機である．VEはPCI Expressカード上に実装されたベクトルプロセッサであり，HBMと
@@ -98,6 +97,8 @@ SX-AT C401-8はVHとして64コアのAMD EPYC 7763 CPUを採用しており，�
 30Aカードを搭載している．8基のVEは2基ずつ共有するPCIeスイッチを経由し，VHに接続している．
 VEは1基あたり96\,GBのHBM2Eメモリ，VHは256\,GBのDDR4メモリを搭載している．また，VHには2基のInfiniBand
 NDR 200G HCAが搭載されており，VHおよびVE間の通信手段として利用することが可能である．
+
+表\ref{tbl:aoba-s}にAOBA-Sの性能諸元を示す．
 
 \begin{figure}[tb]
   \centering
@@ -327,7 +328,7 @@ OSU Micro-Benchmarks
 測定にあたっては，(1) 同一PCIeスイッチ配下のVE間，(2)
 同一VH内の異なるPCIeスイッチ配下のVE間，(3) 同一ラックの異なるVH配下のVE間，
 (4) 同一ラックの異なるVH間，の4パターンを計測した．
-ベンチマークの実効においては\verb|-i 1000 -x 500|オプションを指定し，
+ベンチマークを実行する際には\verb|-i 1000 -x 500|オプションを指定し，
 繰り返し回数を1,0000回，ウォームアップ回数を500回にそれぞれ設定した．
 MPIライブラリには，NECが提供するNEC MPI 3.4.0を用いた．
 
@@ -394,70 +395,153 @@ VEはVH側においてページキャッシュを共有するため，書き込�
 
 \subsection{SPEChpc}\label{sec:spechpc}
 
-SPEChpc 1.1.7
+SPEChpc 2021\cite{Li2022,Kodama2023}は，Standard Performance Evaluation Corporation (SPEC) が開発する
+HPC向けのベンチマーク集である．SPEChpc 2021はTiny，Small，Medium，Largeの問題サイズが異なる
+4種のベンチマークスイートを提供しており，TinyとSmallスイートが9つ，MediumとLargeスイートが6つの
+ベンチマークからなる．各ベンチマークの性能値はベースラインシステム (独TU Dresdenに設置されているTaurus) 
+に対する高速化率として報告される．
+全てのベンチマークは，フラットMPI，MPI+OpenMP，MPI+OpenACC，MPI+OpenMP Target Offloadingの
+4種のプログラミングモデルを利用可能である．本評価ではVEおよびCPUではMPI+OpenMP，GPUではMPI+OpenACCを
+使用する．
+
+本評価では，2022年7月にリリースされたSPEChpc 2021 V1.1.7を使用する．VE30でベンチマークをコンパイル
+する際のコンパイラオプションには，\texttt{-O4 -finline-functions}を使用する．
+また，ベクトル化率およびベクトル長を向上させるため，
+LBMには \texttt{-mretain-none -fivdep -floop-unroll-complete=37}，
+POT3DとminiWeatherには \texttt{-fivdep-omp-worksharing-loop}を指定する．
+SPEChpcの実行ルールでは，OpenMPまたはOpenACC指示行を除いて，一切のソースコードの変更を許していない．
+したがって，本評価ではソースコードを一切修正せず実行している．
 
 \subsubsection{Tinyサイズ}
+
+Tinyサイズは実行に約60\,GBのメモリを要し，主として単一ノードでの実行を想定している．
+メモリ容量が不足するプロセッサについては，実行可能な最小ソケット数で実行し，高速化率を使用
+ソケット数で正規化して報告する．なおTinyスイートのベンチマークのうち
+SOMAとMinisweepはコンパイラの不具合のため結果不整合が発生したため，これらのベンチマークは除いて
+報告する．
+
+\begin{figure*}[tb]
+  \centering
+  \includegraphics{figs/spechpc_tiny.pdf}
+  \caption{SPEChpc Tinyスイートの性能}\label{fig:spechpc-t}
+\end{figure*}
+
+図\ref{fig:spechpc-t}にTinyスイートの性能比較を示す．VE30はLBM，TeaLeaf，POT3Dの3つのベンチマークにおいて
+他のすべてのプロセッサを上回る性能を達成している．これらのベンチマークにおけるA100 80\,GBに対する
+性能差はそれぞれ1.29$\times$，1.36$\times$，1.24$\times$である．LBMとTeaLeafの性能差は
+VE30とA100のメモリ帯域幅の差を超えており，新設されたL3キャッシュや拡張されたLLCが性能に寄与している
+ことがわかる．
+
+また，VE30の性能ははA64FXとIceLake-SPをCloverLeafとminiWeatherにおいて上回るものの，
+A100 40\,GBと80\,GBをやや下回る．これは，CloverLeafのカーネルはギャザメモリアクセスを要求するが，
+A100がギャザのレイテンシの隠蔽においてVE30より優れるためと考えられる．また，miniWeatherは
+メモリ律速のカーネルと演算律速のカーネルの両方を含み，メモリ律速のカーネルはVE30がA100より
+高性能なものの，演算律速のカーネルのA100に劣るため，全体としてはA100に性能が劣っている．
+
+SPH-EXAとHPGMG-FVのVE30における性能は低い．SPH-EXAは粒子法の一種である
+Smoothed Particle Hydrodynamics (SPH) 法に基づくベンチマークであり，8分木を用いた近傍粒子探索を
+行う．8分木の構築と探索はいずれも再帰呼び出しを用いて実装されており，ベクトル化ができないため，VE30
+において性能が非常に低く，ボトルネックとなっている．
+ベクトルプロセッサでは性能を向上するためには，近傍粒子探索をベクトル化可能なアルゴリズム
+に変更する必要がある．
+
+HPGMG-FVは平均ベクトル長の短さによって性能が低くなっている．Tinyスイートにおいては，
+$512^3$の格子を$32^3$の格子に領域分割し，各部分格子をMPIランクに分散している．
+ボトルネックとなる赤-黒順序付けGauss-Seidelスムーザは長さ32の3重ループとなるが，
+しかし，倍精度で256要素保持できるVEのベクトルレジスタに対してはループ長が短すぎるため，
+効率が低くなっている．性能を向上するには，loop collapseによるループ長の拡大が考えられる．
+また，粗い格子レベルをホスト側で実行する最適化も考えられる．
 
 \subsubsection{Largeサイズ}
 
 \begin{figure}[tb]
-  \begin{minipage}[b]{0.45\hsize}
+  \centering
+  \begin{minipage}[b]{0.46\hsize}
     \centering
     \includegraphics{figs/spechpc_lbm_l.pdf}
     \subcaption{LBM}\label{fig:lbm-l}
   \end{minipage}
-  \begin{minipage}[b]{0.45\hsize}
+  \begin{minipage}[b]{0.46\hsize}
     \centering
     \includegraphics{figs/spechpc_tealeaf_l.pdf}
     \subcaption{TeaLeaf}\label{fig:tealeaf-l}
   \end{minipage} \\
-  \begin{minipage}[b]{0.45\hsize}
+  \begin{minipage}[b]{0.46\hsize}
     \centering
     \includegraphics{figs/spechpc_clvleaf_l.pdf}
     \subcaption{CloverLeaf}\label{fig:clvleaf-l}
   \end{minipage}
-  \begin{minipage}[b]{0.45\hsize}
+  \begin{minipage}[b]{0.46\hsize}
     \centering
     \includegraphics{figs/spechpc_pot3d_l.pdf}
     \subcaption{POT3D}\label{fig:pot3d-l}
   \end{minipage} \\
-  \begin{minipage}[b]{0.45\hsize}
+  \begin{minipage}[b]{0.46\hsize}
     \centering
     \includegraphics{figs/spechpc_hpgmgfv_l.pdf}
     \subcaption{HPGMG-FV}\label{fig:hpgmg-l}
   \end{minipage}
-  \begin{minipage}[b]{0.45\hsize}
+  \begin{minipage}[b]{0.46\hsize}
     \centering
     \includegraphics{figs/spechpc_weather_l.pdf}
     \subcaption{miniWeather}\label{fig:weather-l}
   \end{minipage}
-  \caption{SPEChpc Largeサイズの性能}\label{fig:spechpc-l}
+  \caption{SPEChpc Largeスイートの性能}\label{fig:spechpc-l}
 \end{figure}
 
-SPEChpcの公式ウェブサイト\footnote{\url{https://www.spec.org/hpc2021/results/}}において公開されている
-Largeサイズの計測結果は限られているため，ここでは文献~\cite{Brunst2022}において計測が
+Largeサイズは約14.5\,TBのメモリを必要とし，大規模なクラスタを対象としている．
+本報告の執筆時点ではAOBA-S以外の大規模実行環境を準備することができなかったため，
+ここでは文献~\cite{Brunst2022}において計測が
 なされた，米Texas Advanced Computing CenterのFronteraおよび独J\"{u}lich Supercomputing Centreの
-JUWELS Booster上での性能測定結果と比較する．FronteraはノードあたりIntel Xeon Platinum 8280を2
+JUWELS Booster上での性能測定結果を参照する．FronteraはノードあたりIntel Xeon Platinum 8280を2
 ソケット搭載し，InfiniBand HDR100を1ポート備えるシステムである．
 BoosterはノードあたりAMD EPYC 7402を2ソケットとNVIDIA A100 SXM4 40\,GBを4基搭載し，
 InfiniBand HDR200を4ポート備えるシステムである．
 
-図\ref{fig:spechpc-l}は
+図\ref{fig:spechpc-l}にLargeスイートの性能を示す．
+全体の問題サイズは$4096^3$に増大しているものの，1ランクに配布される部分格子のサイズは$2^5$のまま
+であり，ベクトル長の短さが性能劣化の要因となっている．
+LBM，CloverLeaf，miniWeatherでは特にプロセス数数が増加するとBoosterとの性能差が拡大することから，
+Boosterに比べスケーラビリティが劣っている．この原因として，(1) 通信性能の差 (2)
+プログラム起動時間の差，の2点を仮説として，検証を試みた．
 
-図\ref{fig:spechpc-profile}にNEC MPI\footnote{\url{https://sxauroratsubasa.sakura.ne.jp/documents/mpi/pdfs/g2am01-NEC_MPI_User_Guide_ja.pdf}}
-のプロファイラ機能を用いて計測した，各ベンチマークの実行時間に占めるMPI通信時間を示す．
-
-BoosterではNVLink 3.0によってノード内のGPUが全結合されており，GPU間のリンク帯域幅は片方向200\,GB/s
-である．一方，AOBA-SではVE間はルートコンプレックスを根とするツリー型トポロジで接続されており，
-リンク帯域幅は30.5\,GB/sである．したがって，Boosterのノード内バイセクション帯域幅は800\,GB/sである
-一方，AOBA-Sは30.5\,GB/sと，26倍以上の差がある．
-また，Boosterではノード間接続の帯域幅はノードあたり800\,Gbpsであるが，AOBA-Sでは400\,Gbpsであり，
-2倍の差がある．これらの理由により，BoosterではMPI通信時間が短いと推測される．
+まずNEC MPI\footnote{\url{https://sxauroratsubasa.sakura.ne.jp/documents/mpi/pdfs/g2am01-NEC_MPI_User_Guide_ja.pdf}}のプロファイラ機能を用いて，各ベンチマークの実行時間に占めるMPI通信時間を計測した．
+図\ref{fig:spechpc-profile1}にプロファイル結果を示す．
+LBMとCloverLeafでは5\%程度，miniWeatherでは20\%と，通信時間の占める割合は多くない．したがって，
+MPI通信性能がスケーラビリティを制限しているとは考えられない．
 
 \begin{figure}[tb]
   \centering
   \includegraphics{figs/spechpc_profile.pdf}
-  \caption{SPEChpc Largeサイズの実行時間内訳}\label{fig:spechpc-profile}
+  \caption{SPEChpc Largeサイズの実行時間内訳}\label{fig:spechpc-profile1}
+\end{figure}
+
+次に，SPEChpcプログラム起動時間の差を検証する．SPEChpcでは，
+mpirunを呼び出してから終了するまでの時間をベンチマークの実行時間としている．大規模実行では
+MPIプログラムの起動に係る時間が無視できないため，プログラム起動時間を計測した．
+具体的には，SPEChpc
+V1.1より導入された内蔵タイマ\footnote{\url{https://www.spec.org/hpc2021/Docs/changes-in-v1.1.html#timer}}を利用し，ベンチマークごとに次の時間を計測した:
+
+\begin{itemize}
+  \item Launch Overhead Time: ノード，スケジューラ，MPIの起動に費やされた時間
+  \item Application Init Time: データの初期化，ファイル読み込み，領域分割に費やされた時間
+  \item Application Core Time: プログラムの主たる計算処理に費やされた時間
+  \item Application Residual Time: 計算結果の検証や計算結果の出力に費やされた時間
+\end{itemize}
+
+図\ref{fig:spechpc-profile2}に各ベンチマークの実行時間の内訳を示す．
+まず，Application Init TimeとResidual Timeは全てのベンチマークにおいて無視可能であった．一方，
+Launch Overhead Timeはベンチマークに関わらず常に10秒以上であり，特に計算時間が短い
+LBM，TeaLeaf，CloverLeaf，miniWeatherでは実行時間の1/3以上と大きな割合を占める．
+BoosterおよびFronteraの性能値を参照した文献~\cite{Brunst2022}では，このような実行時間の内訳を
+公開していないため，現時点では他システムにおけるLaunch Overhead
+Timeは不明だが，性能差の一因となっている可能性がある．今後は，AOBA-Sにおける起動時間を短縮できるか
+検討するほか，他システムにおいて大規模実行を実施し，Launch Overhead Timeの計測を目指す．
+
+\begin{figure}[tb]
+  \centering
+  \includegraphics{figs/spechpc_profile2.pdf}
+  \caption{SPEChpc Largeサイズの実行時間内訳}\label{fig:spechpc-profile2}
 \end{figure}
 
 \section{おわりに}
