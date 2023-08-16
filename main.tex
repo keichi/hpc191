@@ -89,15 +89,18 @@ AOBA-Sの中核であるVector Engine Type 30AプロセッサはVector Engineプ
   \caption{AOBA-Sの外観}\label{fig:aoba-s}
 \end{figure}
 
-AOBA-Sは，表\ref{tbl:aoba-s}に示す通り
+AOBA-Sの外観写真を図\ref{fig:aoba-s}に示す．
+AOBA-Sは表\ref{tbl:aoba-s}に示す通り，
 504ノードの日本電気社製SX-Aurora TSUBASA C401-8システムから構成されるスーパーコンピュータである．
+
 図\ref{fig:node}にSX-Aurora TSUBASA (SX-AT) C401-8ノードの構成を示す．
 SX-Aurora TSUBASAはVector Host (VH) とVector Engine (VE) の2種のプロセッサが搭載した
 ヘテロジニアスな計算機である．VEはPCI Expressカード上に実装されたベクトルプロセッサであり，
-アプリケーションの実行を担う．VEはHBMと密結合されており，特にメモリ律速のアプリケーションにおいて
-高い性能を発揮する．VHはVEの制御を担い，VEから発行されたI/O等のOS処理を実行するx86\_64プロセッサである．
+アプリケーションの実行を担う．VEは2,048ビット幅のベクトル命令を備えるほか，HBMと密結合されており，
+特にメモリ律速のアプリケーションにおいて高い性能を発揮するよう設計されている．
+VHはVEの制御を担い，VEから発行されたI/O等のOS処理を実行するx86\_64プロセッサである．
 SX-AT C401-8はVHとして64コアのAMD EPYC 7763 CPUを採用しており，各ノードに8基のVector Engine Type
-30Aカードを搭載している．8基のVEはPCIe Gen 4$\times$16によって
+30Aカードを搭載している．8基のVEはPCIe Gen 4.0 x16によって
 2基ずつ共有するPCIeスイッチを経由し，VHに接続している．
 VEは1基あたり96\,GBのHBM2Eメモリ，VHは256\,GBのDDR4メモリを搭載している．また，VHには2基のInfiniBand
 NDR200 HCAが搭載されており，VHおよびVE間で高速通信を実現している．
@@ -135,15 +138,18 @@ VHメモリ容量    & 256\,GB        & 126\,TB                \\ \midrule
   \caption{Vector Engine Type 30Aの外観}\label{fig:ve-card}
 \end{figure}
 
-図\ref{fig:ve30}にVector Engine Type 30A (VE30)プロセッサの概要を示す．VE30はVector
-Engineプロセッサの第3世代となるプロセッサである．VE30は16個のベクトルコアを搭載し，これらの
+図\ref{fig:ve-card}にVector Engine Type 30A (VE30) プロセッサの外観を，
+図\ref{fig:ve30}にVE30プロセッサの概要を示す．VE30はVector
+Engineプロセッサファミリの第3世代となるプロセッサである．VE30は16個のベクトルコアを搭載し，これらの
 ベクトルコアが2次元メッシュ型Network on Chip (NoC)によって接続されている．
+各ベクトルコアは倍精度307.2\,GFLOP/s，単精度614.4\,GFLOP/sの演算性能を有し，プロセッサ全体では
+倍精度4.91\,TFLOP/s，単精度9.83\,TFLOP/sの演算性能を有する．
 ベクトルコア群はNoCによって6.4\,TB/sの帯域幅を有するLast Level Cache 
 (LLC) に接続しており，さらにLLCは2.45\,TB/sの帯域幅を有する96\,GBのHBM2Eメモリに接続している．
 各ベクトルコアはScalar Processing Unit (SPU) とVector Processing Unit (VPU) という2種の実行ユニット
 を搭載している．SPUは命令をフェッチ，デコードし，VPUへベクトル命令を発行する．VPUはベクトル命令を
 実行する．SPUにはL1キャッシュとL2キャッシュが搭載されており，さらに，VE30ではSPUとVPUが共有する
-2\,MBのL3キャッシュが追加されている．
+2\,MBのL3キャッシュが新設されている．L3キャッシュはソフトウェアによってバイパスすることが可能である．
 
 \begin{figure}[tb]
   \centering
@@ -157,20 +163,26 @@ Engineプロセッサの第3世代となるプロセッサである．VE30は16�
 2.54\,TB/sへ1.6倍に向上している．さらに，メモリ容量は48\,GBから96\,GBへ2倍に拡大され，LLCの容量は
 16\,MBから64\,MBへ4倍に拡大している．LLCの帯域幅は3.0\,TB/sから6.4\,TB/sに2.13倍に向上している．
 
+これらの改良に加え，LLC内にリストベクトル演算を加速するためのハードウェア新設や，
+単精度演算におけるアラインメント制約を緩和．
+
 \subsection{相互結合網とストレージ}
 
-物理的には1ラックに16 VHが搭載されており，32ラックに計504 VHが収容されている．
-これに加え，フロントエンドサーバ群および管理・監視サーバに2ラック，ネットワーク機器が2ラック，
+AOBA-Sは計40基のサーバラックから構成される．
+計算ノードについては，1ラックに16 VHが搭載されており，32ラックに計504 VHが収容されている．
+これらに加え，フロントエンドノードおよび管理・監視サーバ群に2ラック，ネットワーク機器が2ラック，
 UPSが3ラック，ストレージが1ラックの計8ラックに収容されている．
 
 相互結合網にはInfiniBand NDRを採用しており，図\ref{fig:topo}に示すように，
 フルバイセクション帯域幅およびノンブロッキングの2段Fat-treeトポロジによって計算ノード，
 ストレージノード，およびフロントエンドノードが接続されている．相互結合網は16基のスパインスイッチおよび
-18基のリーフスイッチによって構成される．各スイッチはNVIDIA Quantum-2 QM9700を採用している．
+18基のリーフスイッチによって構成される．各InfiniBandスイッチにはNVIDIA Quantum-2 QM9700を採用している．
 リーフスイッチのうち16基には計算ノードが接続されており，
 残りの2基にはストレージおよび各種サーバ群が接続されている．計算ノードが接続されている
 各リーフスイッチには32 VH (64 HCA) が接続されている．各スパインスイッチとリーフスイッチの間は2本の
-400\,Gbpsリンクによって接続されており，計算ノード部分のバイセクション帯域幅は204.8\,Tbpsに達する．
+400\,Gb/sリンクによって接続されており，計算ノード部分のバイセクション帯域幅は
+% 400\,Gb/s$\times$2$\times$16$\times$16=204.8\,Tb/sに達する．
+$400\text{\,Gb/s} \times 2 \times 16 \times 16 = 204.8\text{\,Tb/s}$に達する．
 
 \begin{figure}[tb]
   \centering
@@ -178,15 +190,15 @@ UPSが3ラック，ストレージが1ラックの計8ラックに収容され�
   \caption{AOBA-Sの相互結合網}\label{fig:topo}
 \end{figure}
 
-ストレージには2基のDDN社製LustreアプライアンスであるES400NVX2を採用している．
+ストレージにはDN社製LustreアプライアンスであるES400NVX2を2基採用している．
 1基のES400NVX2がMDS/MDT機能を提供しており，仮想マシンとして4台のMDSが稼働している．
 MDTの実効容量は15.3\,TBであり，格納可能な最大i-node数は約55億である．
 もう1基のES400NVX2はOSS/OST機能を提供しており，仮想マシンとして4台のOSSが稼働している．
 OSS/OST用ES400NVX2には4基のSS9012エンクロージャが接続され，合計332本の7.2k\,rpm NL-SAS
 HDDを搭載している．各ES400NVX2は8本のInfiniBand HDR100リンクによって相互結合網に接続している．
 本ストレージは利用者毎の\verb|/uhome|領域として提供しているほか，
-課題参加者間でファイルを共有するための\verb|/short|も提供している．
-また，各ノードには1\,TBのSSDが搭載されており，高速一時領域\verb|/SSDTMP|として利用可能である．
+同一課題の参加者間でファイルを共有するための\verb|/short|領域も提供している．
+また，各ノードには1\,TBのSATA SSDが搭載されており，高速一時領域\verb|/SSDTMP|として利用可能である．
 
 \subsection{ソフトウェア環境}
 
@@ -351,16 +363,16 @@ MPIライブラリには，NECが提供するNEC MPI 3.4.0を用いた．
 \begin{figure}[tb]
   \centering
   \includegraphics{figs/mpi_bandwidth.pdf}
-  \caption{MPI 1対1通信のスループット}\label{fig:bw}
+  \caption{MPI 1対1通信のスループット}\label{fig:mpi-bw}
 \end{figure}
 
-図\ref{fig:mpi-lat}に\verb|osu_bandwidth|ベンチマークで計測したMPI 1対1通信のスループットを示す．
+図\ref{fig:mpi-bw}に\verb|osu_bandwidth|ベンチマークで計測したMPI 1対1通信のスループットを示す．
 スループットではVE間の通信経路によって大きな差が見られず，
 同一PCIeスイッチ配下のVE間で23.1\,GB/s，同一VH内の異なるPCIeスイッチ配下のVE間で22.7\,GB/s，
 同一ラックの異なるVH配下のVE間で 23.6\,GB/sであった．
 InfiniBanad NDR200の理論帯域幅は25\,GB/sであるため，VHを跨ぐVE間通信のスループットは
 94\%と高い効率を達成している．一方，VH内のVE間通信ではPCIeリンク帯域幅が律速要因となるはずだが，
-PCIe Gen 4 $\times$16の理論帯域幅31.5\,GB/sに対して73\%程度の効率に留まっている．
+PCIe Gen 4.0 x16の理論帯域幅31.5\,GB/sに対して73\%程度の効率に留まっている．
 VH間のスループットは22.8\,GB/sとなり，VE間のスループットと同程度であったものの，
 32\,KiB以下のメッセージサイズではVH間のスループットがVE間に比べ3倍程度高かった．
 これはVHとVEのプロセッサの性能差に起因すると考えられる．
@@ -396,6 +408,12 @@ VEはVH側においてページキャッシュを共有するため，書き込�
   \caption{並列ファイルシステムのメタデータ性能}\label{fig:mdtest}
 \end{figure}
 
+\begin{figure*}[tb]
+  \centering
+  \includegraphics{figs/spechpc_tiny.pdf}
+  \caption{SPEChpc Tinyスイートの性能~\cite{Takahashi2023}}\label{fig:spechpc-t}
+\end{figure*}
+
 \subsection{SPEChpc}\label{sec:spechpc}
 
 SPEChpc 2021\cite{Li2022,Kodama2023}は，Standard Performance Evaluation Corporation (SPEC) が開発する
@@ -415,15 +433,9 @@ POT3DとminiWeatherには \texttt{-fivdep-omp-worksharing-loop}を指定する�
 SPEChpcの実行ルールでは，OpenMPまたはOpenACC指示行を除いて，一切のソースコードの変更を許していない．
 したがって，本評価ではソースコードを一切修正せず実行する．
 
-\begin{figure*}[tb]
-  \centering
-  \includegraphics{figs/spechpc_tiny.pdf}
-  \caption{SPEChpc Tinyスイートの性能}\label{fig:spechpc-t}
-\end{figure*}
+\subsubsection{Tinyスイート}
 
-\subsubsection{Tinyサイズ}
-
-Tinyサイズは実行に約60\,GBのメモリを要し，主として単一ノードでの実行を想定している．
+Tinyスイートは実行に約60\,GBのメモリを要し，主として単一ノードでの実行を想定している．
 メモリ容量が不足するプロセッサについては，実行可能な最小ソケット数で実行し，高速化率を使用
 ソケット数で正規化して報告する．なおTinyスイートのベンチマークのうち
 SOMAとMinisweepはコンパイラの不具合のため結果不整合が発生したため，これらのベンチマークは除いて
@@ -455,7 +467,7 @@ $512^3$の格子を$32^3$の格子に領域分割し，各部分格子をMPIラ�
 効率が低くなっている．性能を向上するには，loop collapseによるループ長の拡大が考えられる．
 また，粗い格子レベルをホスト側で実行する最適化も考えられる．
 
-\subsubsection{Largeサイズ}
+\subsubsection{Largeスイート}
 
 \begin{figure}[tb]
   \centering
@@ -492,21 +504,22 @@ $512^3$の格子を$32^3$の格子に領域分割し，各部分格子をMPIラ�
   \caption{SPEChpc Largeスイートの性能}\label{fig:spechpc-l}
 \end{figure}
 
-Largeサイズは約14.5\,TBのメモリを必要とし，大規模なクラスタを対象としている．
+Largeスイートは約14.5\,TBのメモリを必要とし，大規模なクラスタを対象としている．
 本報告の執筆時点ではAOBA-S以外の大規模実行環境を準備することができなかったため，
 ここでは文献~\cite{Brunst2022}において計測が
 なされた，米Texas Advanced Computing CenterのFronteraおよび独J\"{u}lich Supercomputing Centreの
-JUWELS Booster上での性能測定結果を参照する．FronteraはノードあたりIntel Xeon Platinum 8280を2
+JUWELS Booster上での性能測定結果~\cite{Brunst2021}を参照する．
+Frontera~\cite{Stanzione2020}はノードあたりIntel Xeon Platinum 8280を2
 ソケット搭載し，InfiniBand HDR100を1ポート備えるシステムである．
-BoosterはノードあたりAMD EPYC 7402を2ソケットとNVIDIA A100 SXM4 40\,GBを4基搭載し，
+Booster~\cite{Kesselheim2021}はノードあたりAMD EPYC 7402を2ソケットとNVIDIA A100 SXM4 40\,GBを4基搭載し，
 InfiniBand HDR200を4ポート備えるシステムである．
 
-図\ref{fig:spechpc-l}にLargeスイートの性能を示す．
+図\ref{fig:spechpc-l}に各システムにおけるLargeスイートの性能を示す．
 全体の問題サイズは$4096^3$に増大しているものの，1ランクに配布される部分格子のサイズは$2^5$のまま
 であり，ベクトル長の短さが性能劣化の要因となっている．
-LBM，CloverLeaf，miniWeatherでは特にプロセス数数が増加するとBoosterとの性能差が拡大することから，
-Boosterに比べスケーラビリティが劣っている．この原因として，(1) 通信性能の差 (2)
-プログラム起動時間の差，の2点を仮説として，検証を試みた．
+LBM，CloverLeaf，miniWeatherでは特にプロセス数数が増加するとBoosterとの性能差が拡大しており，
+Boosterに比べスケーラビリティが劣っている．この原因として，(1) 通信性能の差 と (2) プログラム起動時間の差
+が考えられるため，検証を試みた．
 
 まずNEC MPI\footnote{\url{https://sxauroratsubasa.sakura.ne.jp/documents/mpi/pdfs/g2am01-NEC_MPI_User_Guide_ja.pdf}}のプロファイラ機能を用いて，各ベンチマークの実行時間に占めるMPI通信時間を計測した．
 図\ref{fig:spechpc-profile1}にプロファイル結果を示す．
@@ -516,7 +529,7 @@ MPI通信性能がスケーラビリティを制限しているとは考えら�
 \begin{figure}[tb]
   \centering
   \includegraphics{figs/spechpc_profile.pdf}
-  \caption{SPEChpc Largeサイズの実行時間内訳}\label{fig:spechpc-profile1}
+  \caption{SPEChpc Largeスイートの実行時間内訳}\label{fig:spechpc-profile1}
 \end{figure}
 
 次に，SPEChpcプログラム起動時間の差を検証する．SPEChpcでは，
@@ -540,22 +553,22 @@ LBM，TeaLeaf，CloverLeaf，miniWeatherでは実行時間の1/3以上と大き�
 BoosterおよびFronteraの性能値を参照した文献~\cite{Brunst2022}では，このような実行時間の内訳を
 公開していないため，現時点では他システムにおけるLaunch Overhead
 Timeは不明だが，性能差の一因となっている可能性がある．今後は，AOBA-Sにおける起動時間を短縮できるか
-検討するほか，他システムにおいて大規模実行を実施し，Launch Overhead Timeの計測を目指す．
+検討するほか，他システムにおいて大規模な実行を行い，Launch Overhead Timeの分析を実施する．
 
 \begin{figure}[tb]
   \centering
   \includegraphics{figs/spechpc_profile2.pdf}
-  \caption{SPEChpc Largeサイズの実行時間内訳}\label{fig:spechpc-profile2}
+  \caption{SPEChpc Largeスイートの実行時間内訳}\label{fig:spechpc-profile2}
 \end{figure}
 
 \section{おわりに}
 
-本稿では東北大学サイバーサイエンスセンターにおいて2023年8月ようり稼働開始したAOBA-Sの設計を示し，
+本稿では東北大学サイバーサイエンスセンターにおいて2023年8月より稼働開始したAOBA-Sの設計を示し，
 運用開始に先駆けて実施した性能評価の結果を報告した．AOBA-Sは第3世代Vector Engine
 プロセッサを採用したベクトル型スーパーコンピュータであり，メモリ律速のアプリケーションにおいて
 同世代のCPUおよびGPUと同等以上の優れた性能を発揮できることが示された．一方，大規模な実行においては
 他システムよりスケーラビリティが劣る場合が存在することが明らかになったので，今後は
-さらに性能評価および性能分析を進め，得られた知見を利用者に還元していく．
+さらに性能評価および性能分析を進め，得られた知見を利用者に対して還元していく．
 
 \subsection*{謝辞}
 
