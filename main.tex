@@ -89,21 +89,27 @@ AOBA-Sの中核であるVector Engine Type 30AプロセッサはVector Engineプ
   \caption{AOBA-Sの外観}\label{fig:aoba-s}
 \end{figure}
 
-AOBA-Sの外観写真を図\ref{fig:aoba-s}に示す．
-AOBA-Sは表\ref{tbl:aoba-s}に示す通り，
-504ノードの日本電気社製SX-Aurora TSUBASA C401-8システムから構成されるスーパーコンピュータである．
-
-図\ref{fig:node}にSX-Aurora TSUBASA (SX-AT) C401-8ノードの構成を示す．
+AOBA-Sの外観を図\ref{fig:aoba-s}に示す．
+AOBA-Sは，504ノードのNEC製SX-Aurora TSUBASA C401-8システムから構成されるスーパーコンピュータである．
+図\ref{fig:node}にSX-Aurora TSUBASA C401-8ノードの構成を示す．
 SX-Aurora TSUBASAはVector Host (VH) とVector Engine (VE) の2種のプロセッサが搭載した
 ヘテロジニアスな計算機である．VEはPCI Expressカード上に実装されたベクトルプロセッサであり，
-アプリケーションの実行を担う．VEは2,048ビット幅のベクトル命令を備えるほか，HBMと密結合されており，
-特にメモリ律速のアプリケーションにおいて高い性能を発揮するよう設計されている．
+アプリケーションの実行を担う．VEは2,048ビット幅のベクトルレジスタを活用したベクトル演算命令を備え，
+高帯域幅メモリとの密結合されており，特にメモリ律速のアプリケーションにおいて高い性能を発揮する．
 VHはVEの制御を担い，VEから発行されたI/O等のOS処理を実行するx86\_64プロセッサである．
 SX-AT C401-8はVHとして64コアのAMD EPYC 7763 CPUを採用しており，各ノードに8基のVector Engine Type
 30Aカードを搭載している．8基のVEはPCIe Gen 4.0 x16によって
 2基ずつ共有するPCIeスイッチを経由し，VHに接続している．
 VEは1基あたり96\,GBのHBM2Eメモリ，VHは256\,GBのDDR4メモリを搭載している．また，VHには2基のInfiniBand
 NDR200 HCAが搭載されており，VHおよびVE間で高速通信を実現している．
+
+表\ref{tbl:aoba-s}にAOBA-Sの1ノードとシステム全体の性能諸元を示す．
+8基のVEが計39.28\,TFLOP/s，1基のVHが2.50\,TFLOP/sの演算性能を
+有するため，SX-Aurora TSUBASA C401-8 1ノードあたり計41.78\,TFLOP/sの演算性能を有する．
+504ノードのシステム全体では21.05\,PFLOP/sの演算性能を有する．
+メモリ帯域については同様にノードあたり19.8\,TB/s，システム全体では9.97\,PB/sである．
+2023年8月現在稼働している国内のシステムと比較すると，ピーク演算性能においてはWisteria/BDEC-01に次いで
+4位，メモリ帯域幅においては富岳に次いで2位の性能である．
 
 \begin{table}[tb]
 \centering
@@ -138,7 +144,7 @@ VHメモリ容量    & 256\,GB        & 126\,TB                \\ \midrule
   \caption{Vector Engine Type 30Aの外観}\label{fig:ve-card}
 \end{figure}
 
-図\ref{fig:ve-card}にVector Engine Type 30A (VE30) プロセッサの外観を，
+図\ref{fig:ve-card}にVector Engine Type 30A (VE30) カードの外観を，
 図\ref{fig:ve30}にVE30プロセッサの概要を示す．VE30はVector
 Engineプロセッサファミリの第3世代となるプロセッサである．VE30は16個のベクトルコアを搭載し，これらの
 ベクトルコアが2次元メッシュ型Network on Chip (NoC)によって接続されている．
@@ -146,10 +152,12 @@ Engineプロセッサファミリの第3世代となるプロセッサである�
 倍精度4.91\,TFLOP/s，単精度9.83\,TFLOP/sの演算性能を有する．
 ベクトルコア群はNoCによって6.4\,TB/sの帯域幅を有するLast Level Cache 
 (LLC) に接続しており，さらにLLCは2.45\,TB/sの帯域幅を有する96\,GBのHBM2Eメモリに接続している．
-各ベクトルコアはScalar Processing Unit (SPU) とVector Processing Unit (VPU) という2種の実行ユニット
+各ベクトルコアはScalar Processing Unit (SPU) とVector Processing Unit (VPU) と呼ばれる2種の実行ユニット
 を搭載している．SPUは命令をフェッチ，デコードし，VPUへベクトル命令を発行する．VPUはベクトル命令を
 実行する．SPUにはL1キャッシュとL2キャッシュが搭載されており，さらに，VE30ではSPUとVPUが共有する
-2\,MBのL3キャッシュが新設されている．L3キャッシュはソフトウェアによってバイパスすることが可能である．
+2\,MBのL3キャッシュが新設されている．L3キャッシュはソフトウェアによってバイパスすることが可能であり，
+選択的キャッシングによって
+局所性の高いデータと低いデータが混在するアプリケーションにおいてキャッシュを有効活用できる．
 
 \begin{figure}[tb]
   \centering
@@ -157,14 +165,15 @@ Engineプロセッサファミリの第3世代となるプロセッサである�
   \caption{VE30の概要図~\cite{Takahashi2023}}\label{fig:ve30}
 \end{figure}
 
-前世代のVE Type 20Aと比較すると，コアあたりの演算性能とメモリアクセス性能を同一である一方，
-コア数が10コアから16コアへ1.6倍に増加し，プロセッサの演算性能は1.6倍に向上している．
+VE30を前世代のVE Type 20Aと比較すると，コアあたりの演算性能とメモリアクセス性能は同一である一方，
+コア数が10コアから16コアへ1.6倍に増加し，プロセッサ全体の演算性能は1.6倍に向上している．
 また，コア数の増加に応じてメモリ帯域幅も1.53\,TB/sから
-2.54\,TB/sへ1.6倍に向上している．さらに，メモリ容量は48\,GBから96\,GBへ2倍に拡大され，LLCの容量は
+2.54\,TB/sへ1.6倍に向上している．さらに，メモリ容量は48\,GBから96\,GBへ2倍に拡大され，LLC容量は
 16\,MBから64\,MBへ4倍に拡大している．LLCの帯域幅は3.0\,TB/sから6.4\,TB/sに2.13倍に向上している．
 
-これらの改良に加え，LLC内にリストベクトル演算を加速するためのハードウェア新設や，
-単精度演算におけるアラインメント制約を緩和．
+これらの改良に加え，リストベクトル演算を加速するための専用ハードウェア新設や，
+単精度演算におけるアラインメント制約の緩和など，アーキテクチャに様々な改良が加えられている．
+これらの改良点の詳細な性能分析については文献~\cite{Takahashi2023}を参照されたい．
 
 \subsection{相互結合網とストレージ}
 
@@ -211,9 +220,9 @@ C++ 14/17とFortran 2008に準拠している．また，GNUツールチェー�
 計測するためのツールとしてPROGINF，同様の情報を関数単位で計測するためのツールとしてFTRACEを
 提供している．
 
-数値計算ライブラリ集としてはNEC Numeric Library Collection
-(NLC) を提供しており，BLAS，LAPACK，SBLAS，ScaLAPACK，FFTW互換のインターフェースを通じて
-既存プログラムの移植を容易にしている．
+数値計算ライブラリ集としてはVector Engine向けに最適化されたNEC Numeric Library Collection (NLC) を
+提供している．NLCはBLAS，LAPACK，SBLAS，ScaLAPACK，FFTW互換のインターフェースを有しており，
+既存ソフトウェア資産の移植を容易にしている．
 
 \section{性能評価}
 
@@ -227,8 +236,8 @@ C++ 14/17とFortran 2008に準拠している．また，GNUツールチェー�
 \subsection{プロセッサ単体性能}\label{sec:proc}
 
 VE30プロセッサの単体性能を同世代の他プロセッサと比較する．
-比較対象のプロセッサは，前世代のVEであるVE Type 20B，富士通A64FX，Intel Xeon Platinum 8368
-(IceLake)，NVIDIA A100 PCIe 40\,GBおよび80\,GBモデルである．
+比較対象のプロセッサは，第2世代VEの8コアモデルであるVector Engine Type 20B，富士通A64FX，
+Intel Xeon Platinum 8368 (IceLake-SP)，NVIDIA A100 PCIe 40\,GBおよび80\,GBモデルである．
 各プロセッサの詳細な諸元については，文献~\cite{Takahashi2023}を参照されたい．
 
 \subsubsection{基本性能}
@@ -244,8 +253,7 @@ HPLおよびHPCGのバイナリには，
 VE30の実効メモリ帯域幅は1.79\,TB/sとなり，他のすべてのプロセッサより高い性能となった．
 一方，ピークメモリ帯域幅に対する効率は72\%であり，これはA100 40\,GBモデルの91\%や80\,GBモデルの
 86\%に比べると低い．これは，VEのキャッシュラインサイズが128\,Bであるのに対し，GPUの
-キャッシュラインサイズが256\,Bと2倍の大きさであるため，STREAMのような連続メモリアクセスにおいて
-GPUが有利である可能性がある．
+キャッシュラインサイズが256\,Bと2倍の大きさであるため，STREAMのような粒度の大きい，連続メモリアクセスにおいてGPUが有利である可能性がある．
 
 \begin{figure}[tb]
   \centering
@@ -260,8 +268,8 @@ GPUが有利である可能性がある．
 PCIe版では電力供給が不足し，パワースロットリングによって性能低下していると考えられる．
 VE30の性能は4.43\,TFLOP/sとなり，A100の両モデルに次いで最も高くなった．
 実行効率は90\%と高く，\verb|vecmd|\footnote{\url{https://sxauroratsubasa.sakura.ne.jp/documents/guide/pdfs/InstallationGuide_E.pdf}}
-コマンドで周波数を監視したところ，パワースロットリングは発生していなかった．よって，PCIeカードの
-電力制約内で安定して性能を発揮できていると言える．
+コマンドで周波数を監視したところ，パワースロットリングは発生していなかった．よって，VE30は
+PCIeカードの電力制約内で安定して性能を発揮できている．
 
 \begin{figure}[tb]
   \centering
@@ -416,7 +424,7 @@ VEはVH側においてページキャッシュを共有するため，書き込�
 
 \subsection{SPEChpc}\label{sec:spechpc}
 
-SPEChpc 2021\cite{Li2022,Kodama2023}は，Standard Performance Evaluation Corporation (SPEC) が開発する
+SPEChpc 2021\cite{Li2022}は，Standard Performance Evaluation Corporation (SPEC) が開発する
 HPC向けのベンチマーク集である．SPEChpc 2021はTiny，Small，Medium，Largeの問題サイズが異なる
 4種のベンチマークスイートを提供しており，TinyとSmallスイートが9つ，MediumとLargeスイートが6つの
 ベンチマークからなる．各ベンチマークの性能値はベースラインシステム (独TU Dresdenに設置されているTaurus) 
@@ -504,7 +512,7 @@ $512^3$の格子を$32^3$の格子に領域分割し，各部分格子をMPIラ�
   \caption{SPEChpc Largeスイートの性能}\label{fig:spechpc-l}
 \end{figure}
 
-Largeスイートは約14.5\,TBのメモリを必要とし，大規模なクラスタを対象としている．
+Largeスイートは実行に約14.5\,TBのメモリを要し，大規模なクラスタを対象としている．
 本報告の執筆時点ではAOBA-S以外の大規模実行環境を準備することができなかったため，
 ここでは文献~\cite{Brunst2022}において計測が
 なされた，米Texas Advanced Computing CenterのFronteraおよび独J\"{u}lich Supercomputing Centreの
@@ -542,14 +550,14 @@ V1.1より導入された内蔵タイマ\footnote{\url{https://www.spec.org/hpc2
   \item[Launch Overhead Time] ノード，スケジューラ，MPIの起動に費やされた時間
   \item[Application Init Time] データの初期化，ファイル読み込み，領域分割等の初期化処理に費やされた時間
   \item[Application Core Time] プログラムの主たる計算処理に費やされた時間
-  \item[Application Resid Time] 計算結果の検証や計算結果の出力等，Init TimeおよびCore Time以外の処理
-      に費やされた時間
+  \item[Application Resid Time] InitおよびCore Timeに含まれない，計算結果の検証や計算結果の出力等の
+      処理に費やされた時間
 \end{description}
 
 図\ref{fig:spechpc-profile2}に各ベンチマークの実行時間の内訳を示す．
 まず，Application Init TimeとResidual Timeは全てのベンチマークにおいて無視可能であった．一方，
 Launch Overhead Timeはベンチマークに関わらず常に10秒以上であり，特に計算時間が短い
-LBM，TeaLeaf，CloverLeaf，miniWeatherでは実行時間の1/3以上と大きな割合を占める．
+LBM，TeaLeaf，CloverLeaf，miniWeatherでは実行時間の1/3以上と大きな割合を占めていた．
 BoosterおよびFronteraの性能値を参照した文献~\cite{Brunst2022}では，このような実行時間の内訳を
 公開していないため，現時点では他システムにおけるLaunch Overhead
 Timeは不明だが，性能差の一因となっている可能性がある．今後は，AOBA-Sにおける起動時間を短縮できるか
@@ -567,15 +575,17 @@ Timeは不明だが，性能差の一因となっている可能性がある．�
 運用開始に先駆けて実施した性能評価の結果を報告した．AOBA-Sは第3世代Vector Engine
 プロセッサを採用したベクトル型スーパーコンピュータであり，メモリ律速のアプリケーションにおいて
 同世代のCPUおよびGPUと同等以上の優れた性能を発揮できることが示された．一方，大規模な実行においては
-他システムよりスケーラビリティが劣る場合が存在することが明らかになったので，今後は
-さらに性能評価および性能分析を進め，得られた知見を利用者に対して還元していく．
+他システムよりスケーラビリティが劣る場合が存在することが明らかになった．
+今後はさらに性能評価および性能分析を進め，得られた知見を利用者に対して還元していく．
 
 \subsection*{謝辞}
 
 性能評価にご協力いただいた東北大学情報部デジタルサービス支援課および日本電気株式会社の皆様に
 感謝いたします．
-本研究成果の一部は，大阪大学サイバーメディアセンターの「SQUID」および
-名古屋大学情報基盤センターの「不老」を利用して得られたものです．
+本研究成果の一部は，大阪大学サイバーメディアセンターの「SQUID」，
+名古屋大学情報基盤センターの「不老」，
+東北大学サイバーサイエンスセンターの「AOBA」
+を利用して得られたものです．
 
 \bibliographystyle{IEEEtran}
 \bibliography{references}
