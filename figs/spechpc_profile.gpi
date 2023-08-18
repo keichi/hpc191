@@ -1,4 +1,4 @@
-set term pdfcairo enhanced size 3in, 2in font "Helvetical,9"
+set term pdfcairo enhanced size 2.8in, 1.8in font "Helvetical,9"
 
 set grid noxtics ytics
 
