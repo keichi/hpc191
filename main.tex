@@ -37,7 +37,7 @@
 \begin{abstract}
 東北大学サイバーサイエンスセンターは，2023年8月よりベクトル型スーパーコンピュータ「AOBA-S」の運用を
 開始した．AOBA-Sは第3世代ベクトルエンジン (VE30) をノードあたり8基搭載した計504ノードから構成され，
-理論演算性能は21.05\,PFLOP/s，メモリ帯域幅は9.97\,PB/sに達する世界最大規模のベクトル型
+理論演算性能は21.05\,PFLOP/s，メモリ帯域幅は9.97\,PB/sに達する世界最高性能のベクトル型
 スーパーコンピュータである．本稿ではAOBA-Sの設計を概説し，運用開始に先駆けて実施したAOBA-Sの
 初期性能評価の結果について報告する．
 \end{abstract}
@@ -46,7 +46,7 @@
 Cyberscience Center, Tohoku University has started the operation of a new vector supercomputer 
 ``AOBA-S'' in August 2023. AOBA-S comprises 504 compute nodes each equipped with eight
 third-generation Vector Engine (VE30) cards. The peak compute performance and memory bandwidth of
-AOBA-S reach 21.05\,PFLOP/s and 9.97\,PB/s, respectively, making it the world's largest vector
+AOBA-S reach 21.05\,PFLOP/s and 9.97\,PB/s, respectively, making it the world's most powerful vector
 supercomputer as of writing this paper. In this paper, we describe the basic design of AOBA-S and
 report the results of the initial performance evaluation that we have conducted prior to the
 operation start of AOBA-S.
@@ -72,7 +72,7 @@ operation start of AOBA-S.
 2023年8月より利用者へのサービス提供を開始した．
 
 AOBA-SはAOBA-Aと比較すると14倍以上の理論演算性能と11倍以上のメモリ帯域幅を有し，
-2023年8月現在では我々の知る限り，世界最大規模かつ世界最高性能のベクトル型スーパーコンピュータである．
+2023年8月現在では我々の知る限り，世界最高性能のベクトル型スーパーコンピュータである．
 AOBA-Sの中核を成すVector Engine Type 30AプロセッサはVector Engineプロセッサファミリの第3世代であり，
 第2世代に比べると演算性能やメモリ帯域幅等の基本性能の向上に加え，様々なアーキテクチャの改良が
 施されている．そのため，実アプリケーションでは理論演算性能やメモリ帯域幅の向上を超える
@@ -94,7 +94,7 @@ AOBA-Sは，504ノードのNEC製SX-Aurora TSUBASA C401-8システムから構�
 図\ref{fig:node}にSX-Aurora TSUBASA C401-8の構成を示す．
 SX-Aurora TSUBASAはVector Host (VH) とVector Engine (VE) の2種のプロセッサが搭載された
 ヘテロジニアスな計算機である．VEはPCI Expressカード上に実装されたベクトルプロセッサであり，
-アプリケーションの実行を担う．VEは2,048ビット幅のベクトル演算命令を備え，
+アプリケーションの実行を担う．VEは16,384-bit幅を処理できるベクトル演算命令を備え，
 高帯域幅メモリとの密結合により，メモリ律速のアプリケーションにおいて高い性能を発揮する．
 VHはVEの制御を担い，VEから発行されたI/O等のOS処理を実行するx86\_64プロセッサである．
 C401-8はVHとして64コアのAMD EPYC 7763 CPUを採用しており，各ノードに8基のVector Engine Type
@@ -107,7 +107,7 @@ NDR200 HCAが接続されており，VHおよびVE間で高速通信を実現し
 8基のVEが計39.28\,TFLOP/s，1基のVHが2.50\,TFLOP/sの演算性能を
 有するため，1ノードあたり計41.78\,TFLOP/sの演算性能を有する．
 504ノードのシステム全体では21.05\,PFLOP/sの演算性能となる．
-メモリ帯域については同様にノードあたり19.8\,TB/s，システム全体では9.97\,PB/sである．
+同様にメモリ帯域についてはノードあたり19.8\,TB/s，システム全体では9.97\,PB/sである．
 これらの性能値を2023年6月版Top500リスト\footnote{\url{https://www.top500.org/lists/top500/2023/06/}}
 に掲載されている国内のシステムと比較すると，
 理論演算性能においては「Wisteria/BDEC-01」に次いで国内4位，メモリ帯域幅においては「富岳」に次いで
@@ -158,11 +158,12 @@ Engineプロセッサファミリの第3世代となるプロセッサである�
 各ベクトルコアはScalar Processing Unit (SPU) とVector Processing Unit (VPU) と呼ばれる2種の実行ユニット
 を備えている．SPUは命令をフェッチ，デコードし，スカラ命令を実行するほか，
 ベクトル命令をVPUへディスパッチする．VPUはベクトル命令を実行する．
-SPUには64\,KBのL1キャッシュと512\,KBのL2キャッシュが搭載されている．
+SPUには64\,KBのL1命令キャッシュ，64\,KBのL1データキャッシュ，および512\,KBの
+L2ユニファイドキャッシュが搭載されている．
 さらに，VE30ではSPUとVPUが共有する2\,MBのプライベートL3キャッシュが新設されている．
 L3キャッシュはメモリアクセスレイテンシを短縮する効果のほか，NoCおよびLLCにおける競合を
 軽減することから，キャッシュ帯域幅律速のアプリケーションの性能を向上する効果も期待される．
-また，L3キャッシュはソフトウェアによってバイパスすることが可能であり，
+また，L3キャッシュはソフトウェア制御によってバイパスすることが可能であり，
 局所性の高いデータと低いデータが混在するアプリケーションにおいて選択的キャッシングを行うことで
 限られたキャッシュ容量を有効活用できる．
 
