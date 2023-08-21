@@ -92,7 +92,7 @@ AOBA-Sの中核を成すVector Engine Type 30AプロセッサはVector Engineプ
 AOBA-Sの外観を図\ref{fig:aoba-s}に示す．
 AOBA-Sは，504ノードのNEC製SX-Aurora TSUBASA C401-8システムから構成されるスーパーコンピュータである．
 図\ref{fig:node}にSX-Aurora TSUBASA C401-8の構成を示す．
-SX-Aurora TSUBASAはVector Host (VH) とVector Engine (VE) の2種のプロセッサが搭載した
+SX-Aurora TSUBASAはVector Host (VH) とVector Engine (VE) の2種のプロセッサが搭載された
 ヘテロジニアスな計算機である．VEはPCI Expressカード上に実装されたベクトルプロセッサであり，
 アプリケーションの実行を担う．VEは2,048ビット幅のベクトル演算命令を備え，
 高帯域幅メモリとの密結合により，メモリ律速のアプリケーションにおいて高い性能を発揮する．
@@ -302,6 +302,7 @@ A100 80\,GBモデルの259\,GFLOP/sとほぼ同等の結果となった．実行
 東北大カーネル集は表\ref{tbl:isc-kernels}に示す6つのそれぞれ律速要因が異なるカーネルからなる．
 
 \begin{table}[tb]
+\centering
 \caption{東北大カーネル集}\label{tbl:isc-kernels}
 \begin{tabular}{@{}lll@{}}
 \toprule
@@ -363,7 +364,7 @@ OSU Micro-Benchmarks
 同一VH内の異なるPCIeスイッチ配下のVE間，(3) 同一ラックの異なるVH配下のVE間，
 (4) 同一ラックの異なるVH間，の4パターンを計測した．
 各ベンチマークを実行する際には\verb|-i 1000 -x 500|オプションを指定し，
-繰り返し回数を1,0000回，ウォームアップ回数を500回にそれぞれ設定した．
+繰り返し回数を1,000回，ウォームアップ回数を500回にそれぞれ設定した．
 MPIライブラリにはNECが提供するNEC MPI 3.4.0を用いた．
 
 図\ref{fig:mpi-lat}に\verb|osu_latency|ベンチマークにより計測したMPI 1対1通信のレイテンシを示す．
@@ -469,7 +470,7 @@ SOMAとMinisweepはNECコンパイラの不具合のため結果不正が発生�
 VE30とA100の実効メモリ帯域幅の差 (1.08倍)を大きく超えており，
 新設されたL3キャッシュや拡張されたLLCが性能に寄与していることがわかる．
 
-また，VE30の性能ははA64FXとIceLake-SPをCloverLeafとminiWeatherにおいて上回るものの，
+また，VE30の性能はA64FXとIceLake-SPをCloverLeafとminiWeatherにおいて上回るものの，
 A100をやや下回る．これは，CloverLeafのカーネルは多数のギャザアクセスを行うが，
 A100がギャザアクセスのレイテンシ隠蔽においてVE30より優れるためと考えられる．また，miniWeatherは
 メモリ律速のカーネルと演算律速のカーネルの両方を含み，メモリ律速のカーネルではVE30がA100より
@@ -563,7 +564,7 @@ MPI通信性能がスケーラビリティを制限しているとは考えら�
 
 次に，プログラム起動時間を分析する．SPEChpcでは，
 mpirunを呼び出してから終了するまでの時間をベンチマークの実行時間としている．大規模実行では
-MPIプログラムの起動に要する時間が無視できないと考えられる，プログラム起動時間を計測した．
+MPIプログラムの起動に要する時間が無視できないと考えられるため，プログラム起動時間を計測した．
 具体的には，SPEChpc
 V1.1より導入された内蔵タイマ\footnote{\url{https://www.spec.org/hpc2021/Docs/changes-in-v1.1.html#timer}}を利用し，ベンチマークごとに次の時間を計測した:
 
@@ -581,7 +582,7 @@ Launch Overhead Timeはベンチマークに関わらず常に10秒以上であ�
 LBM，TeaLeaf，CloverLeaf，miniWeatherでは実行時間の1/3以上と大きな割合を占めていた．
 BoosterおよびFronteraの性能値を参照した文献~\cite{Brunst2022}では実行時間の内訳を
 公開していないため，現時点では他システムにおけるLaunch Overhead
-Timeは不明だが，性能差の一因となっている可能性が高い．今後は，AOBA-Sにおける起動時間を短縮できるか
+Timeは不明だが，性能差の一因となっている可能性がある．今後は，AOBA-Sにおける起動時間を短縮できるか
 検討するとともに，他システムにおいて大規模な実行を行い，Launch Overhead Timeの分析を実施する．
 
 \begin{figure}[tb]
